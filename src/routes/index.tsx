@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Nutrição funcional, testes genéticos e acompanhamento psicológico para atletas de alto rendimento.",
+          "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Presencial em São Paulo e online.",
       },
     ],
   }),
