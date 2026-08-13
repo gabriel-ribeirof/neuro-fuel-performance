@@ -14,7 +14,164 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agendamentos: {
+        Row: {
+          atleta_id: string
+          contrato_id: string
+          created_at: string
+          data: string
+          duracao_min: number
+          horario: string
+          id: string
+          profissional_slug: string
+          status: string
+          tipo_sessao: string
+        }
+        Insert: {
+          atleta_id: string
+          contrato_id: string
+          created_at?: string
+          data: string
+          duracao_min?: number
+          horario: string
+          id?: string
+          profissional_slug: string
+          status?: string
+          tipo_sessao: string
+        }
+        Update: {
+          atleta_id?: string
+          contrato_id?: string
+          created_at?: string
+          data?: string
+          duracao_min?: number
+          horario?: string
+          id?: string
+          profissional_slug?: string
+          status?: string
+          tipo_sessao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atletas: {
+        Row: {
+          clube: string
+          created_at: string
+          email: string | null
+          id: string
+          idade: number
+          nome: string
+          sobrenome: string
+          telefone: string
+          user_id: string
+        }
+        Insert: {
+          clube: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          idade: number
+          nome: string
+          sobrenome: string
+          telefone: string
+          user_id: string
+        }
+        Update: {
+          clube?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          idade?: number
+          nome?: string
+          sobrenome?: string
+          telefone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      contratos: {
+        Row: {
+          atleta_id: string
+          created_at: string
+          id: string
+          mercado_pago_payment_id: string | null
+          pacote_slug: string
+          status: string
+          user_id: string
+          valor_centavos: number
+        }
+        Insert: {
+          atleta_id: string
+          created_at?: string
+          id?: string
+          mercado_pago_payment_id?: string | null
+          pacote_slug: string
+          status?: string
+          user_id: string
+          valor_centavos: number
+        }
+        Update: {
+          atleta_id?: string
+          created_at?: string
+          id?: string
+          mercado_pago_payment_id?: string | null
+          pacote_slug?: string
+          status?: string
+          user_id?: string
+          valor_centavos?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          profissional_slug: string | null
+          role: string
+          telefone: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          nome?: string
+          profissional_slug?: string | null
+          role?: string
+          telefone?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          profissional_slug?: string | null
+          role?: string
+          telefone?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

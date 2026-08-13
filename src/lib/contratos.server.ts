@@ -43,8 +43,8 @@ export const criarContratoEIniciarPagamento = createServerFn({ method: "POST" })
     if (error || !contrato) throw new Error(error?.message ?? "Não foi possível criar o contrato.");
 
     // Email do responsável para o Mercado Pago.
-    const perfil = await supabase.from("profiles").select("id, email").eq("id", userId).maybeSingle();
-    const email = perfil?.data?.email ?? null;
+    const { data: ud } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const email = ud?.user?.email ?? null;
 
     const preferencia = await criarPreferenciaPagamento({
       contratoId: contrato.id as string,

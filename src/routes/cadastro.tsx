@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth } from "@/lib/auth";
+import { useAuth, type DadosAtleta } from "@/lib/auth";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({ meta: [{ title: "Criar conta — Nutrição Neurofuncional iEsports" }] }),
@@ -13,6 +13,7 @@ function Campo({
   type = "text",
   placeholder,
   autoComplete,
+  inputMode,
   value,
   onChange,
   required,
@@ -22,6 +23,7 @@ function Campo({
   type?: string;
   placeholder?: string;
   autoComplete?: string;
+  inputMode?: React.InputHTMLAttributes<HTMLInputElement>["inputMode"];
   value: string;
   onChange: (v: string) => void;
   required?: boolean;
@@ -34,6 +36,7 @@ function Campo({
         type={type}
         required={required}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none transition-colors focus:border-camel"
@@ -76,14 +79,17 @@ function CadastroPage() {
       return;
     }
 
-    const resultado = await cadastrar(email.trim(), senha, { nome, telefone }, {
+    const atleta: DadosAtleta = {
       nome: atNome.trim(),
       sobrenome: atSobrenome.trim(),
       idade,
       clube: atClube.trim(),
-      email: atEmail.trim() || undefined,
       telefone: atTelefone.trim(),
-    });
+    };
+    const emailAtleta = atEmail.trim();
+    if (emailAtleta) atleta.email = emailAtleta;
+
+    const resultado = await cadastrar(email.trim(), senha, { nome, telefone }, atleta);
 
     setEnviando(false);
     if (resultado.erro) {
