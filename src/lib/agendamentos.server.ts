@@ -36,7 +36,8 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const [anamneseNeuro, anamneseNutri] = ANAMNESE_ORDEM;
+    const anamneseNeuro = ANAMNESE_ORDEM[0]!;
+    const anamneseNutri = ANAMNESE_ORDEM[1]!;
 
     // 1. Contrato pertence ao responsável e está pago.
     const { data: contrato } = await supabase

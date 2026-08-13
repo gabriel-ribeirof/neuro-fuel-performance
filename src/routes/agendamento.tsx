@@ -24,9 +24,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useSearch } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/agendamento")({
-  validateSearch: (s: Record<string, unknown>): { contrato?: string } => ({
-    contrato: typeof s["contrato"] === "string" ? s["contrato"] : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { contrato?: string } => {
+    const contrato = typeof s["contrato"] === "string" ? s["contrato"] : undefined;
+    return contrato !== undefined ? { contrato } : {};
+  },
   head: () => ({ meta: [{ title: "Agendar avaliação — Nutrição Neurofuncional iEsports" }] }),
   component: AgendamentoPage,
 });
