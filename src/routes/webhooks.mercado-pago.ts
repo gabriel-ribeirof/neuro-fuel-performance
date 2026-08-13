@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buscarPagamento } from "@/lib/mercado-pago.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { enviarConfirmacaoWhatsApp, montarTextoConfirmacao } from "@/lib/whatsapp.server";
-import { nomeProfissional } from "@/lib/negocio";
 
 /**
  * Notificação do Mercado Pago quando um pagamento muda de status. É a ÚNICA
@@ -57,23 +55,8 @@ async function processarNotificacao(request: Request): Promise<Response> {
       return new Response("ok", { status: 200 });
     }
 
-    // WhatsApp: grava plano pago. A confirmação data/horário fica no agendamento.
-    try {
-      const [{ data: perfil }, { data: atleta }] = await Promise.all([
-        db.from("profiles").select("nome, telefone, email").eq("id", contrato.user_id).maybeSingle(),
-        db.from("atletas").select("nome, sobrenome, telefone").eq("id", contrato.atleta_id).maybeSingle(),
-      ]);
-      const destinatario = perfil?.telefone || atleta?.telefone;
-      if (destinatario) {
-        await enviarConfirmacaoWhatsApp({
-          para: destinatario.replace(/\D/g, ""),
-          texto: `Olá! Seu pacote foi confirmado e seu espaço no projeto foi liberado. Agora é só marcar a anamnese com Amanda e Letícia.`,
-        });
-      }
-    } catch (erroWhats) {
-      console.error("Erro ao notificar por WhatsApp:", erroWhats);
-    }
-
+    // WhatsApp é manual (links wa.me) — a confirmação do espaço liberado é
+    // feita pelo próprio cliente nas telas de confirmación.
     return new Response("ok", { status: 200 });
   } catch (erro) {
     console.error("Erro ao processar webhook do Mercado Pago:", erro);

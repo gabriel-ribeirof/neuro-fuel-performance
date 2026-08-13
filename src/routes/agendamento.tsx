@@ -13,7 +13,9 @@ import {
   ehDiaDeAtendimento,
   horariosDisponiveis,
   inicioDaSemana,
+  linkWhatsAppProfissional,
   mesmaSemana,
+  nomeProfissional,
   proximosDias,
   type Horario,
 } from "@/lib/negocio";
@@ -170,7 +172,7 @@ function AgendamentoPage() {
         setEnviando(false);
         return;
       }
-      setSucesso("Avaliação agendada! Confirmação enviada por WhatsApp e e-mail.");
+      setSucesso("Avaliação agendada! Compartilhe a confirmação com a equipe pelo WhatsApp abaixo.");
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Falha ao agendar.");
     }
@@ -345,7 +347,34 @@ function AgendamentoPage() {
         <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">{erro}</p>
       )}
       {sucesso && (
-        <p className="mt-6 rounded-xl border border-emerald-600/30 bg-emerald-600/5 px-4 py-3 text-xs text-emerald-800">{sucesso}</p>
+        <div className="mt-6 rounded-xl border border-emerald-600/30 bg-emerald-600/5 px-4 py-3 text-xs text-emerald-800">
+          <p>{sucesso}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              { slug: "amanda" as const, data: amandaData, horario: amandaHorario },
+              { slug: "leticia" as const, data: leticiaData, horario: leticiaHorario },
+            ].map((item) => {
+              const link = item.data && item.horario
+                ? linkWhatsAppProfissional(
+                    item.slug,
+                    `Olá, ${nomeProfissional(item.slug)}! Confirmo a sessão do dia ${new Date(`${item.data}T12:00:00`).toLocaleDateString("pt-BR")} às ${item.horario}. Meu contrato com a Nutrição Neurofuncional iEsports já está pago.`,
+                  )
+                : null;
+              if (!link) return null;
+              return (
+                <a
+                  key={item.slug}
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full bg-espresso px-4 py-2 text-xs font-medium text-linen hover:bg-cocoa"
+                >
+                  Enviar confirmação para {nomeProfissional(item.slug)}
+                </a>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {passoAtual() >= 2 && (

@@ -4,12 +4,28 @@
 
 export type ProfissionalSlug = "amanda" | "manuela" | "leticia" | "gabriel";
 
-export const PROFISSIONAIS: { slug: ProfissionalSlug; nome: string; especialidade: string }[] = [
-  { slug: "amanda", nome: "Amanda Ciaramicoli", especialidade: "Neuronutricionista" },
-  { slug: "manuela", nome: "Manuela Gestal", especialidade: "Neuronutricionista" },
-  { slug: "leticia", nome: "Letícia Frazão", especialidade: "Nutricionista esportiva" },
-  { slug: "gabriel", nome: "Gabriel Fernandes", especialidade: "Auxiliar de atendimentos" },
+export type Profissional = {
+  slug: ProfissionalSlug;
+  nome: string;
+  especialidade: string;
+  // WhatsApp com DDI + DDD, apenas dígitos (ex: 5511999998888).
+  // Usado nos links wa.me das confirmações. Deixe vazio até saber o número.
+  whatsapp: string;
+};
+
+export const PROFISSIONAIS: Profissional[] = [
+  { slug: "amanda", nome: "Amanda Ciaramicoli", especialidade: "Neuronutricionista", whatsapp: "5511984975662" },
+  { slug: "manuela", nome: "Manuela Gestal", especialidade: "Neuronutricionista", whatsapp: "5511936212928" },
+  { slug: "leticia", nome: "Letícia Frazão", especialidade: "Nutricionista esportiva", whatsapp: "5521981226038" },
+  { slug: "gabriel", nome: "Gabriel Fernandes", especialidade: "Auxiliar de atendimentos", whatsapp: "5521996864747" },
 ];
+
+/** Link wa.me (abre WhatsApp com mensagem pronta) pra um profissional. */
+export function linkWhatsAppProfissional(slug: ProfissionalSlug, texto: string): string | null {
+  const numero = PROFISSIONAIS.find((p) => p.slug === slug)?.whatsapp?.replace(/\D/g, "");
+  if (!numero) return null;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+}
 
 export function nomeProfissional(slug: ProfissionalSlug): string {
   return PROFISSIONAIS.find((p) => p.slug === slug)?.nome ?? slug;

@@ -2,7 +2,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/integrations/supabase/auth-middleware.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { enviarConfirmacaoWhatsApp, montarTextoConfirmacao } from "@/lib/whatsapp.server";
 import { nomeProfissional, type ProfissionalSlug } from "@/lib/negocio";
 
 async function lerPerfilSeguro(userId: string) {
@@ -139,40 +138,11 @@ export const atualizarSessaoAdmin = createServerFn({ method: "POST" })
         .update({ data: data.novaData, horario: data.novoHorario, status: "agendado" })
         .eq("id", data.agendamentoId);
       if (erroData) throw new Error(erroData.message);
-
-      // Notifica por WhatsApp (se configurado) a nova data/horário.
-      await notificarRemarcacao(db, data.agendamentoId);
       return { ok: true };
     }
 
     throw new Error("Ação desconhecida.");
   });
-
-async function notificarRemarcacao(db: Awaited<ReturnType<typeof supabaseAdmin>>, agendamentoId: string) {
-  const { data: s } = await db
-    .from("agendamentos")
-    .select("atleta_id, profissional_slug, data, horario")
-    .eq("id", agendamentoId)
-    .maybeSingle();
-  if (!s) return;
-
-  const { data: atl } = await db.from("atletas").select("user_id, nome, sobrenome, telefone").eq("id", s.atleta_id).maybeSingle();
-  const { data: perfil } = await db.from("profiles").select("nome, telefone").eq("id", atl?.user_id ?? "").maybeSingle();
-
-  const destino = perfil?.telefone || atl?.telefone;
-  if (destino) {
-    await enviarConfirmacaoWhatsApp({
-      para: destino.replace(/\D/g, ""),
-      texto: montarTextoConfirmacao({
-        responsavelNome: perfil?.nome ?? "Responsável",
-        atletaNome: atl ? `${atl.nome} ${atl.sobrenome}` : "atleta",
-        profissional: nomeProfissional(s.profissional_slug as ProfissionalSlug),
-        dataFormatada: new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR"),
-        horario: s.horario,
-      }),
-    });
-  }
-}
 
 export const trocarStatusSessaoProfissional = createServerFn({ method: "POST" })
   .middleware([requireAuth])

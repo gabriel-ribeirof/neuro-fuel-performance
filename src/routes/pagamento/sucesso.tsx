@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { linkWhatsAppProfissional, nomeProfissional } from "@/lib/negocio";
 
 export const Route = createFileRoute("/pagamento/sucesso")({
   head: () => ({ meta: [{ title: "Pagamento confirmado — Nutrição Neurofuncional iEsports" }] }),
@@ -6,6 +7,10 @@ export const Route = createFileRoute("/pagamento/sucesso")({
 });
 
 function SucessoPage() {
+  const linkEquipe = linkWhatsAppProfissional(
+    "amanda",
+    "Olá, Amanda! Acabei de confirmar o pagamento do meu pacote pela Nutrição Neurofuncional iEsports. Vamos agendar minha avaliação inicial?",
+  );
   return (
     <section className="mx-auto flex min-h-[60vh] max-w-xl items-center px-6 py-20">
       <div className="w-full text-center">
@@ -17,6 +22,16 @@ function SucessoPage() {
           Recebemos sua confirmação. Agora é só agendar a avaliação inicial — as duas
           primeiras sessões ficam marcadas na mesma semana.
         </p>
+        {linkEquipe && (
+          <a
+            href={linkEquipe}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-6 inline-block rounded-full bg-emerald-700 px-6 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-emerald-800"
+          >
+            Falar com a {nomeProfissional("amanda")} no WhatsApp
+          </a>
+        )}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
             to="/agendamento"
