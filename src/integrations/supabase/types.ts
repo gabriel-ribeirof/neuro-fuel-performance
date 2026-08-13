@@ -174,27 +174,7 @@ export type Database = {
       }
     }
     Views: {
-      horarios_ocupados: {
-        Row: {
-          data: string | null
-          duracao_min: number | null
-          horario: string | null
-          profissional_slug: string | null
-        }
-        Insert: {
-          data?: string | null
-          duracao_min?: number | null
-          horario?: string | null
-          profissional_slug?: string | null
-        }
-        Update: {
-          data?: string | null
-          duracao_min?: number | null
-          horario?: string | null
-          profissional_slug?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
