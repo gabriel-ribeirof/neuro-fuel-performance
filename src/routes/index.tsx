@@ -10,8 +10,8 @@ import {
   HeartHandshake,
   Laptop,
   MapPin,
+  Play,
   Quote,
-  ShieldCheck,
   Sparkles,
   Stethoscope,
   Users,
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Presencial em São Paulo e online.",
+          "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
       },
       {
         property: "og:title",
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Presencial em São Paulo e online.",
+          "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
       },
     ],
   }),
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/")({
 });
 
 const trustItems = [
-  "Atendimento presencial e online",
+  "Atendimento 100% online",
   "+10 anos de experiência com atletas de alto rendimento",
   "Parceria oficial iEsports",
 ];
@@ -59,16 +59,15 @@ const trustItems = [
 const differentials = [
   { icon: Sparkles, title: "Atendimento personalizado", text: "Protocolos desenhados para a rotina e a modalidade de cada atleta." },
   { icon: Users, title: "Equipe multidisciplinar", text: "Nutrição, neurociência e psicologia do esporte em um só cuidado." },
-  { icon: ShieldCheck, title: "Parceria com a CBF", text: "Experiência com formação de base e alto rendimento nacional." },
-  { icon: Laptop, title: "Presencial e online", text: "Consultório em São Paulo e acompanhamento remoto no exterior." },
+  { icon: Laptop, title: "100% online", text: "Acompanhamento remoto para atletas em qualquer estado ou país." },
 ];
 
 const steps = [
-  { n: "01", title: "Aprovação no Experience", text: "O atleta é aprovado no projeto Experience da iEsports." },
-  { n: "02", title: "Escolha do pacote", text: "Seleção do plano de acompanhamento ideal para o momento da carreira." },
-  { n: "03", title: "Pagamento", text: "Confirmação segura e liberação imediata da agenda." },
-  { n: "04", title: "Anamnese com Amanda", text: "Avaliação nutricional completa e histórico de performance." },
-  { n: "05", title: "Sessão com Letícia", text: "Encontro de saúde mental esportiva na mesma semana." },
+  { n: "01", title: "Escolha do pacote", text: "Seleção do plano de acompanhamento ideal para o momento da carreira." },
+  { n: "02", title: "Pagamento", text: "Confirmação segura e liberação imediata da agenda." },
+  { n: "03", title: "Anamnese e histórico completo do paciente", text: "Avaliação detalhada e histórico de performance com a equipe." },
+  { n: "04", title: "Avaliação nutricional completa", text: "Análise nutricional individualizada para o esporte." },
+  { n: "05", title: "Sessões com o Gabriel", text: "4 atendimentos visando a performance esportiva." },
   { n: "06", title: "Acompanhamento contínuo", text: "Ajustes, retornos e suporte durante toda a jornada." },
 ];
 
@@ -80,17 +79,17 @@ const services = [
 ];
 
 const packages = [
-  { name: "Essencial", price: "R$ 890", items: ["Consulta nutricional completa", "Plano alimentar individual", "1 retorno em 30 dias"] },
-  { name: "Performance", price: "R$ 1.480", items: ["Consulta neuronutricional", "Sessão de performance mental", "2 retornos trimestrais"] },
-  { name: "Alto Rendimento", price: "R$ 2.390", items: ["Nutrição + psicologia mensal", "Ajustes de periodização", "Suporte direto com a equipe"] },
-  { name: "Experience Full", price: "R$ 3.890", items: ["Teste genético e metabolômica", "Acompanhamento contínuo 6 meses", "Relatórios para comissão técnica"] },
+  { name: "Inicial", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
+  { name: "Plus Atletas", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
+  { name: "Plus com Teste Genético", price: "R$ 6.490", items: ["Pacote Plus + teste genético + devolutiva", "Valor do teste genético: R$ 4.500"] },
+  { name: "Plus Pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro (Amanda)", "1 retorno Neuro + 1 retorno Nutri"] },
 ];
 
 const team = [
-  { name: "Amanda Ciaramicoli", role: "Nutricionista esportiva e neurofuncional", img: amandaImg },
-  { name: "Manuela Gestal", role: "Médica do esporte e medicina integrativa", img: manuelaImg },
-  { name: "Letícia Frazão", role: "Psicóloga do esporte", img: leticiaImg },
-  { name: "Gabriel Fernandes", role: "Coordenação iEsports Experience", img: gabrielImg },
+  { name: "Amanda Ciaramicoli", role: "Neuronutricionista · Nutrigeneticista · Psicanalista", img: amandaImg },
+  { name: "Manuela Gestal", role: "Neuronutricionista · Nutrigeneticista · Psicanalista", img: manuelaImg },
+  { name: "Letícia Frazão", role: "Nutricionista esportiva", img: leticiaImg },
+  { name: "Gabriel Fernandes", role: "Auxiliar de atendimentos", img: gabrielImg },
 ];
 
 const values = [
@@ -102,9 +101,14 @@ const values = [
 ];
 
 const testimonials = [
-  { quote: "Meu foco em campo mudou completamente depois do acompanhamento. Entendi como comer para render.", author: "Rafael M.", role: "Atleta — categoria sub-20" },
-  { quote: "Como mãe, senti segurança do primeiro contato. A equipe cuida do atleta e da família.", author: "Cristiane P.", role: "Mãe de atleta no exterior" },
-  { quote: "A parte emocional era meu maior obstáculo. As sessões me deram ferramentas reais para os jogos.", author: "Lucas D.", role: "Atleta profissional" },
+  { quote: "Sou grato a Amanda por ter me ajudado muito no período em que eu estava no SPFC! Foi um trabalho essencial para que eu conseguisse me conhecer melhor, e com isso saber dos meus pontos fortes e fracos. Aprendi a me concentrar melhor nos jogos, aprendi técnicas que me faziam permanecer focado nos meus objetivos! Um ótimo trabalho que até hoje utilizo e colho frutos não somente em campo mas para minha vida.", author: "Sidão", role: "Jogador de futebol" },
+  { quote: "Desde que comecei o trabalho com a Amanda venho melhorando cada vez mais minha consciência sobre minhas emoções e como administrá-las da maneira correta. Pude me tornar uma pessoa mais madura, sábia e principalmente efetiva nas áreas da minha vida. Graças ao esforço da Amanda e seu empenho nas sessões pude ter um crescimento exponencial.", author: "André Sion", role: "Jogador de futebol" },
+  { quote: "Como paciente da Dra. Amanda, quero reconhecer o trabalho de excelência que ela apresenta! Buscamos, eu e minha esposa, melhorar nosso desempenho físico, mental e emocional, e foi gratificante perceber uma profissional extremamente dedicada, estudiosa e atenciosa nos mínimos detalhes. Com suplementos preparados e customizados para cada um, já percebemos a evolução e melhoria de nossa saúde integral!", author: "Everaldo Coelho", role: "Vice-presidente Palmeiras" },
+  { quote: "A Amanda está sendo de suma importância na vida do meu filho, atleta de 10 anos. Estamos em acompanhamento há pouco mais de um ano e o tanto que ele evoluiu é absurdamente notório: ele se comunicava pouco durante as partidas e hoje é um líder nato dentro da quadra e do campo!", author: "Natalia Oliveira", role: "Mãe de atleta" },
+  { quote: "Estou com a Amanda há quase dois anos, ela é uma excelente profissional e neste período senti uma melhora em todos os aspectos da parte mental dentro e fora de campo. Ela me ajudou a ter mais confiança, acreditar mais em mim mesmo, ter mais comprometimento comigo mesmo. Só tenho a agradecer por tudo que ela fez por mim e pela minha evolução tanto como profissional e como pessoa.", author: "Leonardo Tristão", role: "Jogador de futebol" },
+  { quote: "Gosto muito de trabalhar com a Amanda, tive uma grande evolução na minha carreira, e hoje vejo o quanto isso faz diferença. É um trabalho indispensável para qualquer pessoa que deseja ter rendimento e qualidade de vida.", author: "Lourency Rodrigues", role: "Jogador de futebol" },
+  { quote: "Acho que a palavra parceria descreve bem: ela é uma pessoa que sempre sabe o que falar, extremamente profissional e humana! Tenho um carinho enorme por ela, comecei a cursar psicologia justamente por conta dela!", author: "Luigi Eric", role: "Jogador de futsal" },
+  { quote: "Amanda, obrigado por suas orientações e apoio à minha família. Quero agradecer por sua contribuição valiosa no crescimento do Victor. Seu trabalho é fundamental para nosso sucesso, e com você nos ajudando o processo fica mais fácil.", author: "Gilmar Homem", role: "Pai de atleta" },
 ];
 
 function Index() {
@@ -124,27 +128,6 @@ function Index() {
           ))}
         </div>
       </div>
-
-      {/* Nav */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <a href="#top" className="font-display text-lg tracking-[0.18em] uppercase">
-            iEsports <span className="text-camel">Nutri</span>
-          </a>
-          <div className="hidden items-center gap-8 text-sm text-cocoa md:flex">
-            <a href="#servicos" className="hover:text-espresso">Serviços</a>
-            <a href="#pacotes" className="hover:text-espresso">Pacotes</a>
-            <a href="#equipe" className="hover:text-espresso">Equipe</a>
-            <a href="#onde" className="hover:text-espresso">Onde atendemos</a>
-          </div>
-          <a
-            href="#pacotes"
-            className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa"
-          >
-            Iniciar jornada
-          </a>
-        </nav>
-      </header>
 
       {/* Hero */}
       <section id="top" className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-20 lg:grid-cols-2 lg:py-28">
@@ -201,42 +184,33 @@ function Index() {
         </div>
       </section>
 
-      {/* Process */}
-      <section id="processo" className="mx-auto max-w-7xl px-6 py-24">
-        <Reveal>
-          <p className="eyebrow">O processo</p>
-          <h2 className="mt-4 max-w-xl text-4xl text-espresso lg:text-5xl">
-            Da aprovação no Experience ao acompanhamento contínuo
-          </h2>
-        </Reveal>
-        <div className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-border bg-border md:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 70} className="bg-card">
-              <div className="p-8">
-                <span className="font-display text-3xl text-camel">{s.n}</span>
-                <h3 className="mt-4 text-xl text-espresso">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-cocoa">{s.text}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
       {/* Neuronutrition */}
-      <section className="bg-khaki/60">
+      <section id="neuronutricao" className="bg-khaki/60">
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-24 lg:grid-cols-2">
           <Reveal>
-            <img
-              src={neuroImg}
-              alt="Alimentos funcionais para performance cognitiva"
-              loading="lazy"
-              width={1200}
-              height={912}
-              className="h-[420px] w-full rounded-[2rem] object-cover"
-            />
+            <div className="relative">
+              <img
+                src={neuroImg}
+                alt="Alimentos funcionais para performance cognitiva"
+                loading="lazy"
+                width={1200}
+                height={912}
+                className="h-[420px] w-full rounded-[2rem] object-cover"
+              />
+              {/* Vídeo da Amanda explicando a neuronutrição */}
+              <button
+                type="button"
+                aria-label="Assistir vídeo: Amanda explica a neuronutrição"
+                className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-espresso/30"
+              >
+                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-linen text-espresso shadow-xl transition-transform hover:scale-105">
+                  <Play className="ml-1 h-8 w-8" strokeWidth={1.5} />
+                </span>
+              </button>
+            </div>
           </Reveal>
           <Reveal delay={100}>
-            <p className="eyebrow">O que é neuronutrição</p>
+            <p className="eyebrow">O que é a nutrição neurofuncional</p>
             <h2 className="mt-4 text-4xl text-espresso lg:text-5xl">
               Alimentação que conversa com o cérebro
             </h2>
@@ -251,6 +225,27 @@ function Index() {
               pela via metabólica.
             </p>
           </Reveal>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section id="processo" className="mx-auto max-w-7xl px-6 py-24">
+        <Reveal>
+          <p className="eyebrow">O processo</p>
+          <h2 className="mt-4 max-w-xl text-4xl text-espresso lg:text-5xl">
+            Da escolha do pacote ao acompanhamento contínuo
+          </h2>
+        </Reveal>
+        <div className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-border bg-border md:grid-cols-3">
+          {steps.map((s, i) => (
+            <Reveal key={s.n} delay={i * 70} className="bg-card">
+              <div className="p-8">
+                <span className="font-display text-3xl text-camel">{s.n}</span>
+                <h3 className="mt-4 text-xl text-espresso">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-cocoa">{s.text}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </section>
 
@@ -295,10 +290,10 @@ function Index() {
                     ))}
                   </ul>
                   <a
-                    href="#cta"
+                    href="/pacotes"
                     className="mt-8 inline-flex items-center justify-center rounded-full bg-espresso px-5 py-3 text-sm font-medium text-linen transition-colors hover:bg-cocoa"
                   >
-                    Escolher pacote
+                    Ver pacote
                   </a>
                 </article>
               </Reveal>
@@ -404,18 +399,17 @@ function Index() {
         <div className="mx-auto grid max-w-7xl gap-10 px-6 py-24 md:grid-cols-2">
           <Reveal>
             <MapPin className="h-7 w-7 text-camel" strokeWidth={1.2} />
-            <h2 className="mt-5 text-3xl text-espresso">Consultório em São Paulo</h2>
+            <h2 className="mt-5 text-3xl text-espresso">Base em São Paulo</h2>
             <p className="mt-3 leading-relaxed text-cocoa">
-              Vista Verde Offices — Av. Vereador José Diniz, São Paulo/SP.
-              <br />
-              Atendimento presencial com horários dedicados a atletas.
+              Vista Verde Offices — Av. Queiroz Filho, 1560, Conj. 201, Vila Hamburguesa,
+              São Paulo/SP.
             </p>
           </Reveal>
           <Reveal delay={100}>
             <Laptop className="h-7 w-7 text-camel" strokeWidth={1.2} />
-            <h2 className="mt-5 text-3xl text-espresso">Atendimento online</h2>
+            <h2 className="mt-5 text-3xl text-espresso">Atendimento 100% online</h2>
             <p className="mt-3 leading-relaxed text-cocoa">
-              Consultas por vídeo para atletas em outros estados ou vivendo temporada no exterior,
+              Consultas por vídeo para atletas em qualquer estado ou vivendo temporada no exterior,
               com o mesmo protocolo e acompanhamento contínuo.
             </p>
           </Reveal>
@@ -434,43 +428,15 @@ function Index() {
             sentido para o seu momento de carreira.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-4">
-            <a href="#pacotes" className="inline-flex items-center gap-2 rounded-full bg-espresso px-7 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa">
+            <a href="/pacotes" className="inline-flex items-center gap-2 rounded-full bg-espresso px-7 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa">
               Escolher pacote <CreditCard className="h-4 w-4" strokeWidth={1.5} />
             </a>
-            <a href="#onde" className="inline-flex items-center gap-2 rounded-full border border-cocoa px-7 py-3.5 text-sm font-medium text-cocoa transition-colors hover:bg-khaki">
-              Tirar dúvidas <CalendarCheck className="h-4 w-4" strokeWidth={1.5} />
+            <a href="/cadastro" className="inline-flex items-center gap-2 rounded-full border border-cocoa px-7 py-3.5 text-sm font-medium text-cocoa transition-colors hover:bg-khaki">
+              Criar conta <CalendarCheck className="h-4 w-4" strokeWidth={1.5} />
             </a>
           </div>
         </Reveal>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-espresso text-linen">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-3">
-          <div>
-            <p className="font-display text-lg tracking-[0.18em] uppercase">
-              iEsports <span className="text-camel">Nutri</span>
-            </p>
-            <p className="mt-4 max-w-xs text-sm text-khaki">
-              Nutrição Neurofuncional iEsports — neuronutrição e saúde mental esportiva.
-            </p>
-          </div>
-          <div className="text-sm text-khaki">
-            <p className="text-linen">Contato</p>
-            <p className="mt-3">contato@iesports.com.br</p>
-            <p className="mt-1">Vista Verde Offices — São Paulo/SP</p>
-          </div>
-          <div className="text-sm text-khaki">
-            <p className="text-linen">Redes</p>
-            <p className="mt-3">Instagram</p>
-            <p className="mt-1">LinkedIn</p>
-            <p className="mt-1">iesports.com.br</p>
-          </div>
-        </div>
-        <div className="border-t border-linen/15 py-6 text-center text-xs text-khaki">
-          © {new Date().getFullYear()} Nutrição Neurofuncional iEsports
-        </div>
-      </footer>
     </div>
   );
 }

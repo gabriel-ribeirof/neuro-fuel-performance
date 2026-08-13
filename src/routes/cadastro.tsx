@@ -1,0 +1,159 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { useAuth } from "@/lib/auth";
+
+export const Route = createFileRoute("/cadastro")({
+  head: () => ({ meta: [{ title: "Criar conta — Nutrição Neurofuncional iEsports" }] }),
+  component: CadastroPage,
+});
+
+function Campo({
+  id,
+  label,
+  type = "text",
+  placeholder,
+  autoComplete,
+  value,
+  onChange,
+  required,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  autoComplete?: string;
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm text-cocoa">{label}</label>
+      <input
+        id={id}
+        type={type}
+        required={required}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none transition-colors focus:border-camel"
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+function CadastroPage() {
+  const { cadastrar, carregando, user } = useAuth();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+
+  const [atNome, setAtNome] = useState("");
+  const [atSobrenome, setAtSobrenome] = useState("");
+  const [atIdade, setAtIdade] = useState("");
+  const [atClube, setAtClube] = useState("");
+  const [atEmail, setAtEmail] = useState("");
+  const [atTelefone, setAtTelefone] = useState("");
+
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [sucesso, setSucesso] = useState("");
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setEnviando(true);
+    setErro(null);
+    setSucesso("");
+
+    const idade = Number.parseInt(atIdade, 10);
+    if (Number.isNaN(idade) || idade <= 0) {
+      setEnviando(false);
+      setErro("Informe uma idade válida para o atleta.");
+      return;
+    }
+
+    const resultado = await cadastrar(email.trim(), senha, { nome, telefone }, {
+      nome: atNome.trim(),
+      sobrenome: atSobrenome.trim(),
+      idade,
+      clube: atClube.trim(),
+      email: atEmail.trim() || undefined,
+      telefone: atTelefone.trim(),
+    });
+
+    setEnviando(false);
+    if (resultado.erro) {
+      setErro(resultado.erro);
+      return;
+    }
+
+    if (user) {
+      navigate({ to: "/pacotes", replace: true });
+      return;
+    }
+    setSucesso("Conta criada! Confirme seu e-mail e depois entre para continuar.");
+  }
+
+  return (
+    <section className="mx-auto max-w-2xl px-6 py-20">
+      <p className="eyebrow">Criar conta</p>
+      <h1 className="mt-4 font-display text-4xl text-espresso">Vamos começar</h1>
+      <p className="mt-3 max-w-xl text-sm text-cocoa">
+        Cadastre os dados do responsável e do atleta. Depois você escolhe o
+        pacote e agenda a avaliação inicial.
+      </p>
+
+      <form onSubmit={onSubmit} className="mt-10 space-y-10">
+        <fieldset className="space-y-5">
+          <legend className="font-display text-xl text-espresso">Responsável</legend>
+          <Campo id="nome" label="Nome completo" autoComplete="name" value={nome} onChange={setNome} required />
+          <Campo id="telefone" label="Celular (WhatsApp)" type="tel" autoComplete="tel" value={telefone} onChange={setTelefone} required placeholder="(11) 99999-9999" />
+          <Campo id="email" label="E-mail" type="email" autoComplete="email" value={email} onChange={setEmail} required placeholder="voce@email.com" />
+          <Campo id="senha" label="Senha" type="password" autoComplete="new-password" value={senha} onChange={setSenha} required />
+        </fieldset>
+
+        <fieldset className="space-y-5">
+          <legend className="font-display text-xl text-espresso">Atleta</legend>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Campo id="at-nome" label="Nome" value={atNome} onChange={setAtNome} required />
+            <Campo id="at-sobrenome" label="Sobrenome" value={atSobrenome} onChange={setAtSobrenome} required />
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Campo id="at-idade" label="Idade" type="number" inputMode="numeric" value={atIdade} onChange={setAtIdade} required />
+            <Campo id="at-clube" label="Clube/Time" value={atClube} onChange={setAtClube} placeholder="Ex.: Vivo Keyd, LOS…" />
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Campo id="at-email" label="E-mail do atleta (opcional)" type="email" value={atEmail} onChange={setAtEmail} />
+            <Campo id="at-telefone" label="Celular do atleta" type="tel" value={atTelefone} onChange={setAtTelefone} placeholder="(11) 98888-8888" />
+          </div>
+        </fieldset>
+
+        {erro && (
+          <p className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">{erro}</p>
+        )}
+        {sucesso && (
+          <p className="rounded-xl border border-emerald-600/30 bg-emerald-600/5 px-4 py-3 text-xs text-emerald-800">{sucesso}</p>
+        )}
+
+        <button
+          type="submit"
+          disabled={enviando}
+          className="w-full rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa disabled:opacity-60"
+        >
+          {enviando ? "Criando conta…" : "Criar conta"}
+        </button>
+      </form>
+
+      <p className="mt-8 text-center text-sm text-cocoa">
+        Já tem acesso?{" "}
+        <Link to="/login" className="text-espresso underline underline-offset-4">
+          Entrar
+        </Link>
+      </p>
+    </section>
+  );
+}

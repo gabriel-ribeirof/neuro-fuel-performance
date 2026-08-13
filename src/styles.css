@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-display: "Bodoni Moda", serif;
+  --font-display: "Playfair Display", serif;
   --font-sans: "Manrope", sans-serif;
   --color-linen: oklch(0.958 0.014 85);
   --color-khaki: oklch(0.845 0.028 79);

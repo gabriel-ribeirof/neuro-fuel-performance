@@ -10,33 +10,180 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AgendamentoRouteImport } from './routes/agendamento'
+import { Route as AreaClienteRouteImport } from './routes/area-cliente'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PacotesRouteImport } from './routes/pacotes'
+import { Route as ProfissionalRouteImport } from './routes/profissional'
+import { Route as PagamentoFalhaRouteImport } from './routes/pagamento/falha'
+import { Route as PagamentoPendenteRouteImport } from './routes/pagamento/pendente'
+import { Route as PagamentoSucessoRouteImport } from './routes/pagamento/sucesso'
+import { Route as WebhooksMercadoPagoRouteImport } from './routes/webhooks.mercado-pago'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgendamentoRoute = AgendamentoRouteImport.update({
+  id: '/agendamento',
+  path: '/agendamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AreaClienteRoute = AreaClienteRouteImport.update({
+  id: '/area-cliente',
+  path: '/area-cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PacotesRoute = PacotesRouteImport.update({
+  id: '/pacotes',
+  path: '/pacotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfissionalRoute = ProfissionalRouteImport.update({
+  id: '/profissional',
+  path: '/profissional',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagamentoFalhaRoute = PagamentoFalhaRouteImport.update({
+  id: '/pagamento/falha',
+  path: '/pagamento/falha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagamentoPendenteRoute = PagamentoPendenteRouteImport.update({
+  id: '/pagamento/pendente',
+  path: '/pagamento/pendente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagamentoSucessoRoute = PagamentoSucessoRouteImport.update({
+  id: '/pagamento/sucesso',
+  path: '/pagamento/sucesso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WebhooksMercadoPagoRoute = WebhooksMercadoPagoRouteImport.update({
+  id: '/webhooks/mercado-pago',
+  path: '/webhooks/mercado-pago',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/agendamento': typeof AgendamentoRoute
+  '/area-cliente': typeof AreaClienteRoute
+  '/cadastro': typeof CadastroRoute
+  '/login': typeof LoginRoute
+  '/pacotes': typeof PacotesRoute
+  '/profissional': typeof ProfissionalRoute
+  '/pagamento/falha': typeof PagamentoFalhaRoute
+  '/pagamento/pendente': typeof PagamentoPendenteRoute
+  '/pagamento/sucesso': typeof PagamentoSucessoRoute
+  '/webhooks/mercado-pago': typeof WebhooksMercadoPagoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/agendamento': typeof AgendamentoRoute
+  '/area-cliente': typeof AreaClienteRoute
+  '/cadastro': typeof CadastroRoute
+  '/login': typeof LoginRoute
+  '/pacotes': typeof PacotesRoute
+  '/profissional': typeof ProfissionalRoute
+  '/pagamento/falha': typeof PagamentoFalhaRoute
+  '/pagamento/pendente': typeof PagamentoPendenteRoute
+  '/pagamento/sucesso': typeof PagamentoSucessoRoute
+  '/webhooks/mercado-pago': typeof WebhooksMercadoPagoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/agendamento': typeof AgendamentoRoute
+  '/area-cliente': typeof AreaClienteRoute
+  '/cadastro': typeof CadastroRoute
+  '/login': typeof LoginRoute
+  '/pacotes': typeof PacotesRoute
+  '/profissional': typeof ProfissionalRoute
+  '/pagamento/falha': typeof PagamentoFalhaRoute
+  '/pagamento/pendente': typeof PagamentoPendenteRoute
+  '/pagamento/sucesso': typeof PagamentoSucessoRoute
+  '/webhooks/mercado-pago': typeof WebhooksMercadoPagoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/agendamento'
+    | '/area-cliente'
+    | '/cadastro'
+    | '/login'
+    | '/pacotes'
+    | '/profissional'
+    | '/pagamento/falha'
+    | '/pagamento/pendente'
+    | '/pagamento/sucesso'
+    | '/webhooks/mercado-pago'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/agendamento'
+    | '/area-cliente'
+    | '/cadastro'
+    | '/login'
+    | '/pacotes'
+    | '/profissional'
+    | '/pagamento/falha'
+    | '/pagamento/pendente'
+    | '/pagamento/sucesso'
+    | '/webhooks/mercado-pago'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/agendamento'
+    | '/area-cliente'
+    | '/cadastro'
+    | '/login'
+    | '/pacotes'
+    | '/profissional'
+    | '/pagamento/falha'
+    | '/pagamento/pendente'
+    | '/pagamento/sucesso'
+    | '/webhooks/mercado-pago'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AgendamentoRoute: typeof AgendamentoRoute
+  AreaClienteRoute: typeof AreaClienteRoute
+  CadastroRoute: typeof CadastroRoute
+  LoginRoute: typeof LoginRoute
+  PacotesRoute: typeof PacotesRoute
+  ProfissionalRoute: typeof ProfissionalRoute
+  PagamentoFalhaRoute: typeof PagamentoFalhaRoute
+  PagamentoPendenteRoute: typeof PagamentoPendenteRoute
+  PagamentoSucessoRoute: typeof PagamentoSucessoRoute
+  WebhooksMercadoPagoRoute: typeof WebhooksMercadoPagoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +195,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agendamento': {
+      id: '/agendamento'
+      path: '/agendamento'
+      fullPath: '/agendamento'
+      preLoaderRoute: typeof AgendamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/area-cliente': {
+      id: '/area-cliente'
+      path: '/area-cliente'
+      fullPath: '/area-cliente'
+      preLoaderRoute: typeof AreaClienteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pacotes': {
+      id: '/pacotes'
+      path: '/pacotes'
+      fullPath: '/pacotes'
+      preLoaderRoute: typeof PacotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profissional': {
+      id: '/profissional'
+      path: '/profissional'
+      fullPath: '/profissional'
+      preLoaderRoute: typeof ProfissionalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pagamento/falha': {
+      id: '/pagamento/falha'
+      path: '/pagamento/falha'
+      fullPath: '/pagamento/falha'
+      preLoaderRoute: typeof PagamentoFalhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pagamento/pendente': {
+      id: '/pagamento/pendente'
+      path: '/pagamento/pendente'
+      fullPath: '/pagamento/pendente'
+      preLoaderRoute: typeof PagamentoPendenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pagamento/sucesso': {
+      id: '/pagamento/sucesso'
+      path: '/pagamento/sucesso'
+      fullPath: '/pagamento/sucesso'
+      preLoaderRoute: typeof PagamentoSucessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/webhooks/mercado-pago': {
+      id: '/webhooks/mercado-pago'
+      path: '/webhooks/mercado-pago'
+      fullPath: '/webhooks/mercado-pago'
+      preLoaderRoute: typeof WebhooksMercadoPagoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AgendamentoRoute: AgendamentoRoute,
+  AreaClienteRoute: AreaClienteRoute,
+  CadastroRoute: CadastroRoute,
+  LoginRoute: LoginRoute,
+  PacotesRoute: PacotesRoute,
+  ProfissionalRoute: ProfissionalRoute,
+  PagamentoFalhaRoute: PagamentoFalhaRoute,
+  PagamentoPendenteRoute: PagamentoPendenteRoute,
+  PagamentoSucessoRoute: PagamentoSucessoRoute,
+  WebhooksMercadoPagoRoute: WebhooksMercadoPagoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

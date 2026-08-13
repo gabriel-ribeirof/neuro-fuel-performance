@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AuthProvider } from "@/lib/auth";
+import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 
 function NotFoundComponent() {
   return (
@@ -87,13 +89,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Nutrição Neurofuncional iEsports | Neuronutrição para atletas" },
       {
         property: "og:description",
-        content: "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Presencial em São Paulo e online.",
+        content: "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Nutrição Neurofuncional iEsports | Neuronutrição para atletas" },
-      { name: "twitter:description", content: "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Presencial em São Paulo e online." },
+      { name: "twitter:description", content: "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/623a20f8d77bafe25b7e02d0c7fab56c/id-preview-0f73d557--baa57c32-8958-487d-a467-6bdca2b50ccd.lovable.app-1786549057385.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/623a20f8d77bafe25b7e02d0c7fab56c/id-preview-0f73d557--baa57c32-8958-487d-a467-6bdca2b50ccd.lovable.app-1786549057385.png" },
     ],
@@ -102,7 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Manrope:wght@300;400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@300;400;500;600;700&display=swap",
       },
       {
         rel: "stylesheet",
@@ -119,7 +121,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
@@ -136,8 +138,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AuthProvider>
+        <SiteHeader />
+        <main id="conteudo">
+          {/* Required: nested routes render here. */}
+          <Outlet />
+        </main>
+        <SiteFooter />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

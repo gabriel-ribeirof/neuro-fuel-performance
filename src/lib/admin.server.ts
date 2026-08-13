@@ -1,0 +1,195 @@
+// Server functions do painel administrativo e da agenda dos profissionais.
+import { createServerFn } from "@tanstack/react-start";
+import { requireAuth } from "@/integrations/supabase/auth-middleware.server";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { enviarConfirmacaoWhatsApp, montarTextoConfirmacao } from "@/lib/whatsapp.server";
+import { nomeProfissional, type ProfissionalSlug } from "@/lib/negocio";
+
+async function lerPerfilSeguro(userId: string) {
+  const db = await supabaseAdmin;
+  const { data } = await db.from("profiles").select("role, profissional_slug").eq("id", userId).maybeSingle();
+  return data;
+}
+
+/** Exige admin. */
+async function exigirAdmin(userId: string) {
+  const perfil = await lerPerfilSeguro(userId);
+  if (perfil?.role !== "admin") throw new Error("Acesso restrito ao painel administrativo.");
+  return perfil;
+}
+
+/** Exige profissional (ou admin). */
+async function exigirProfissional(userId: string) {
+  const perfil = await lerPerfilSeguro(userId);
+  if (!perfil || (perfil.role !== "profissional" && perfil.role !== "admin")) {
+    throw new Error("Acesso restrito aos profissionais.");
+  }
+  return perfil;
+}
+
+/** Agenda do profissional logado (só as sessões com ele/ela). */
+export const listarMinhaAgenda = createServerFn({ method: "GET" })
+  .middleware([requireAuth])
+  .handler(async ({ context }) => {
+    const perfil = await exigirProfissional(context.userId);
+    const db = await supabaseAdmin;
+
+    const { data: agendamentos } = await db
+      .from("agendamentos")
+      .select("id, contrato_id, atleta_id, tipo_sessao, data, horario, duracao_min, status, profissional_slug")
+      .eq("profissional_slug", perfil.profissional_slug ?? "amanda")
+      .order("data", { ascending: true });
+
+    const nomes = new Map<string, string>();
+    for (const a of agendamentos ?? []) {
+      if (!nomes.has(a.atleta_id)) {
+        const { data: atl } = await db.from("atletas").select("nome, sobrenome").eq("id", a.atleta_id).maybeSingle();
+        if (atl) nomes.set(a.atleta_id, `${atl.nome} ${atl.sobrenome}`);
+      }
+    }
+
+    return (agendamentos ?? []).map((a) => ({
+      id: a.id,
+      tipoSessao: a.tipo_sessao,
+      data: a.data,
+      horario: a.horario,
+      duracaoMin: a.duracao_min,
+      status: a.status,
+      atletaNome: nomes.get(a.atleta_id) ?? "—",
+    }));
+  });
+
+/** Painel admin: resumo de tudo. */
+export const listarVisaoAdmin = createServerFn({ method: "GET" })
+  .middleware([requireAuth])
+  .handler(async ({ context }) => {
+    await exigirAdmin(context.userId);
+    const db = await supabaseAdmin;
+
+    const [{ data: contratos }, { data: agendamentos }, { data: atletas }] = await Promise.all([
+      db.from("contratos").select("id, user_id, atleta_id, pacote_slug, valor_centavos, status, created_at"),
+      db.from("agendamentos").select("id, atleta_id, profissional_slug, tipo_sessao, data, horario, status").order("data", { ascending: true }),
+      db.from("atletas").select("id, nome, sobrenome, idade, clube, telefone, user_id"),
+    ]);
+
+    const nomes = new Map<string, string>();
+    for (const a of atletas ?? []) nomes.set(a.id, `${a.nome} ${a.sobrenome}`);
+    const emails = new Map<string, string>();
+    for (const c of contratos ?? []) {
+      if (!emails.has(c.user_id)) {
+        const { data: p } = await db.from("profiles").select("email, telefone").eq("id", c.user_id).maybeSingle();
+        emails.set(c.user_id, p?.email ?? "");
+      }
+    }
+
+    return {
+      contratos: (contratos ?? []).map((c) => ({
+        id: c.id,
+        pacoteSlug: c.pacote_slug,
+        valorCentavos: c.valor_centavos,
+        status: c.status,
+        createdAt: c.created_at,
+        atletaNome: nomes.get(c.atleta_id) ?? "—",
+        responsavelEmail: emails.get(c.user_id) ?? "",
+      })),
+      agendamentos: (agendamentos ?? []).map((a) => ({
+        id: a.id,
+        atletaNome: nomes.get(a.atleta_id) ?? "—",
+        profissional: a.profissional_slug,
+        tipoSessao: a.tipo_sessao,
+        data: a.data,
+        horario: a.horario,
+        status: a.status,
+      })),
+      atletas: (atletas ?? []).map((a) => ({
+        id: a.id,
+        nome: nomes.get(a.id) ?? "—",
+        idade: a.idade,
+        clube: a.clube,
+        telefone: a.telefone,
+      })),
+    };
+  });
+
+export const atualizarSessaoAdmin = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator(
+    (dado: { agendamentoId: string; acao: "cancelar" | "remarcar"; novaData?: string; novoHorario?: string }) =>
+      dado,
+  )
+  .handler(async ({ data, context }) => {
+    await exigirAdmin(context.userId);
+    const db = await supabaseAdmin;
+
+    if (data.acao === "cancelar") {
+      const { error } = await db
+        .from("agendamentos")
+        .update({ status: "cancelado" })
+        .eq("id", data.agendamentoId);
+      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+
+    if (data.acao === "remarcar") {
+      if (!data.novaData || !data.novoHorario) {
+        throw new Error("Data e horário são obrigatórios para remarcar.");
+      }
+      const { error: erroData } = await db
+        .from("agendamentos")
+        .update({ data: data.novaData, horario: data.novoHorario, status: "agendado" })
+        .eq("id", data.agendamentoId);
+      if (erroData) throw new Error(erroData.message);
+
+      // Notifica por WhatsApp (se configurado) a nova data/horário.
+      await notificarRemarcacao(db, data.agendamentoId);
+      return { ok: true };
+    }
+
+    throw new Error("Ação desconhecida.");
+  });
+
+async function notificarRemarcacao(db: Awaited<ReturnType<typeof supabaseAdmin>>, agendamentoId: string) {
+  const { data: s } = await db
+    .from("agendamentos")
+    .select("atleta_id, profissional_slug, data, horario")
+    .eq("id", agendamentoId)
+    .maybeSingle();
+  if (!s) return;
+
+  const { data: atl } = await db.from("atletas").select("user_id, nome, sobrenome, telefone").eq("id", s.atleta_id).maybeSingle();
+  const { data: perfil } = await db.from("profiles").select("nome, telefone").eq("id", atl?.user_id ?? "").maybeSingle();
+
+  const destino = perfil?.telefone || atl?.telefone;
+  if (destino) {
+    await enviarConfirmacaoWhatsApp({
+      para: destino.replace(/\D/g, ""),
+      texto: montarTextoConfirmacao({
+        responsavelNome: perfil?.nome ?? "Responsável",
+        atletaNome: atl ? `${atl.nome} ${atl.sobrenome}` : "atleta",
+        profissional: nomeProfissional(s.profissional_slug as ProfissionalSlug),
+        dataFormatada: new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR"),
+        horario: s.horario,
+      }),
+    });
+  }
+}
+
+export const trocarStatusSessaoProfissional = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((dado: { agendamentoId: string; status: "realizado" | "cancelado" }) => dado)
+  .handler(async ({ data, context }) => {
+    // Profissional só mexe na própria sessão.
+    const perfil = await exigirProfissional(context.userId);
+    const db = await supabaseAdmin;
+    const { data: sessao } = await db
+      .from("agendamentos")
+      .select("profissional_slug")
+      .eq("id", data.agendamentoId)
+      .maybeSingle();
+    if (!sessao || sessao.profissional_slug !== perfil.profissional_slug) {
+      throw new Error("Sessão não pertence ao seu consultório.");
+    }
+    const { error } = await db.from("agendamentos").update({ status: data.status }).eq("id", data.agendamentoId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
