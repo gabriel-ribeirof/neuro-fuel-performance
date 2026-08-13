@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("id", userId)
       .maybeSingle();
     if (data) {
-      setPapel(data.role ?? "responsavel");
+      setPapel((data.role ?? "responsavel") as Papel);
       setPerfilNome(data.nome ?? "");
     }
   }

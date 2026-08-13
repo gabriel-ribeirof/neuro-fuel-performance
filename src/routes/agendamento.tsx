@@ -24,8 +24,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useSearch } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/agendamento")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    contrato: typeof s.contrato === "string" ? s.contrato : undefined,
+  validateSearch: (s: Record<string, unknown>): { contrato?: string } => ({
+    contrato: typeof s["contrato"] === "string" ? s["contrato"] : undefined,
   }),
   head: () => ({ meta: [{ title: "Agendar avaliação — Nutrição Neurofuncional iEsports" }] }),
   component: AgendamentoPage,
@@ -85,7 +85,7 @@ function AgendamentoPage() {
         }));
       setContratos(pagos);
       if (pagos.length > 0) {
-        const inicial = contratoParam && pagos.some((c) => c.id === contratoParam) ? contratoParam : pagos[0].id;
+        const inicial = (contratoParam && pagos.some((c) => c.id === contratoParam) ? contratoParam : pagos[0]?.id) ?? "";
         setContratoId(inicial);
       }
       setCarregandoContratos(false);
@@ -95,8 +95,9 @@ function AgendamentoPage() {
   // Carrega horários ocupados do intervalo de dias exibidos.
   useEffect(() => {
     if (dias.length === 0) return;
-    const inicio = dias[0].toISOString().slice(0, 10);
-    const fim = dias[dias.length - 1].toISOString().slice(0, 10);
+    const inicio = dias[0]?.toISOString().slice(0, 10);
+    const fim = dias[dias.length - 1]?.toISOString().slice(0, 10);
+    if (!inicio || !fim) return;
     buscarHorariosOcupados({ data: { inicio, fim } }).then((dados) => setOcupados(dados));
   }, [dias]);
 

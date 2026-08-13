@@ -76,8 +76,8 @@ export const listarVisaoAdmin = createServerFn({ method: "GET" })
     const emails = new Map<string, string>();
     for (const c of contratos ?? []) {
       if (!emails.has(c.user_id)) {
-        const { data: p } = await db.from("profiles").select("email, telefone").eq("id", c.user_id).maybeSingle();
-        emails.set(c.user_id, p?.email ?? "");
+        const { data: ud } = await db.auth.admin.getUserById(c.user_id);
+        emails.set(c.user_id, ud?.user?.email ?? "");
       }
     }
 

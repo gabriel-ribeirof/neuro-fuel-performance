@@ -59,7 +59,17 @@ function AreaClientePage() {
         .in("contrato_id", ids)
         .order("data", { ascending: true })
         .then(({ data }) => {
-          setSessoes((data ?? []) as SessaoCliente[]);
+          setSessoes(
+            (data ?? []).map((r) => ({
+              id: r.id,
+              contratoId: r.contrato_id,
+              profissionalSlug: r.profissional_slug,
+              tipoSessao: r.tipo_sessao,
+              data: r.data,
+              horario: r.horario,
+              status: r.status,
+            })),
+          );
           setCarregou(true);
         });
     });

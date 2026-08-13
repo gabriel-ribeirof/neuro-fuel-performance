@@ -7,6 +7,7 @@ import {
   dataParaChave,
   mesmaSemana,
   type HorarioOcupado,
+  type ProfissionalSlug,
 } from "@/lib/negocio";
 
 export type AgendamentoMsg = {
@@ -35,6 +36,7 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const [anamneseNeuro, anamneseNutri] = ANAMNESE_ORDEM;
 
     // 1. Contrato pertence ao responsável e está pago.
     const { data: contrato } = await supabase
@@ -60,7 +62,6 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
     }
 
     // 3. Amanda antes de Letícia (mesmo dia ou dia anterior da semana).
-    const inicioSemana = amanda;
     if (leticia < amanda) {
       return {
         ok: false,
@@ -76,7 +77,7 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
       .from("agendamentos")
       .select("id")
       .eq("contrato_id", data.contratoId)
-      .in("tipo_sessao", [ANAMNESE_ORDEM[0].tipo, ANAMNESE_ORDEM[1].tipo])
+      .in("tipo_sessao", [anamneseNeuro.tipo, anamneseNutri.tipo])
       .eq("status", "agendado");
     if (existentes && existentes.length > 0) {
       return { ok: false, erro: "A anamnese desse contrato já está marcada." };
@@ -96,10 +97,10 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
     const conflita = (dataStr: string, horario: string, profissional: string) =>
       indiceOcupado.has(`${dataStr}|${horario}|${profissional}`);
 
-    if (conflita(amandaData, data.amandaHorario, ANAMNESE_ORDEM[0].profissional)) {
+    if (conflita(amandaData, data.amandaHorario, anamneseNeuro.profissional)) {
       return { ok: false, erro: "Esse horário da Amanda já foi reservado. Escolha outro." };
     }
-    if (conflita(leticiaData, data.leticiaHorario, ANAMNESE_ORDEM[1].profissional)) {
+    if (conflita(leticiaData, data.leticiaHorario, anamneseNutri.profissional)) {
       return { ok: false, erro: "Esse horário da Letícia já foi reservado. Escolha outro." };
     }
 
@@ -151,14 +152,20 @@ export async function listarMeusAgendamentos(userId: string) {
 
 export type { HorarioOcupado };
 
-/** Consulta horários ocupados (view pública) num intervalo. */
+/** Consulta horários ocupados num intervalo (qualquer cliente autenticado consulta). */
 export const buscarHorariosOcupados = createServerFn({ method: "GET" })
   .validator((dado: { inicio: string; fim: string }) => dado)
   .handler(async ({ data }) => {
     const { data: ocupados } = await supabaseAdmin
-      .from("horarios_ocupados")
+      .from("agendamentos")
       .select("data, horario, duracao_min, profissional_slug")
+      .in("status", ["agendado", "confirmado"])
       .gte("data", data.inicio)
       .lte("data", data.fim);
-    return (ocupados ?? []) as HorarioOcupado[];
+    return (ocupados ?? []).map((o) => ({
+      data: o.data ?? "",
+      horario: o.horario ?? "",
+      duracaoMin: o.duracao_min ?? 0,
+      profissional: (o.profissional_slug ?? "amanda") as ProfissionalSlug,
+    }));
   });

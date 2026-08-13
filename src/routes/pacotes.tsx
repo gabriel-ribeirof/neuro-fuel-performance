@@ -95,7 +95,7 @@ function PacotesPage() {
       .then(({ data }) => {
         const lista = (data ?? []) as AtletaResumo[];
         setAtletas(lista);
-        if (lista.length > 0) setAtletaSelecionado(lista[0].id);
+        if (lista.length > 0) setAtletaSelecionado(lista[0]?.id ?? "");
         setCarregandoAtletas(false);
       });
   }, [user]);
