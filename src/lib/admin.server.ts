@@ -6,7 +6,11 @@ import { nomeProfissional, type ProfissionalSlug } from "@/lib/negocio";
 
 async function lerPerfilSeguro(userId: string) {
   const db = await supabaseAdmin;
-  const { data } = await db.from("profiles").select("role, profissional_slug").eq("id", userId).maybeSingle();
+  const { data } = await db
+    .from("profiles")
+    .select("role, profissional_slug")
+    .eq("id", userId)
+    .maybeSingle();
   return data;
 }
 
@@ -35,14 +39,20 @@ export const listarMinhaAgenda = createServerFn({ method: "GET" })
 
     const { data: agendamentos } = await db
       .from("agendamentos")
-      .select("id, contrato_id, atleta_id, tipo_sessao, data, horario, duracao_min, status, profissional_slug")
+      .select(
+        "id, contrato_id, atleta_id, tipo_sessao, data, horario, duracao_min, status, profissional_slug",
+      )
       .eq("profissional_slug", perfil.profissional_slug ?? "amanda")
       .order("data", { ascending: true });
 
     const nomes = new Map<string, string>();
     for (const a of agendamentos ?? []) {
       if (!nomes.has(a.atleta_id)) {
-        const { data: atl } = await db.from("atletas").select("nome, sobrenome").eq("id", a.atleta_id).maybeSingle();
+        const { data: atl } = await db
+          .from("atletas")
+          .select("nome, sobrenome")
+          .eq("id", a.atleta_id)
+          .maybeSingle();
         if (atl) nomes.set(a.atleta_id, `${atl.nome} ${atl.sobrenome}`);
       }
     }
@@ -66,8 +76,13 @@ export const listarVisaoAdmin = createServerFn({ method: "GET" })
     const db = await supabaseAdmin;
 
     const [{ data: contratos }, { data: agendamentos }, { data: atletas }] = await Promise.all([
-      db.from("contratos").select("id, user_id, atleta_id, pacote_slug, valor_centavos, status, created_at"),
-      db.from("agendamentos").select("id, atleta_id, profissional_slug, tipo_sessao, data, horario, status").order("data", { ascending: true }),
+      db
+        .from("contratos")
+        .select("id, user_id, atleta_id, pacote_slug, valor_centavos, status, created_at"),
+      db
+        .from("agendamentos")
+        .select("id, atleta_id, profissional_slug, tipo_sessao, data, horario, status")
+        .order("data", { ascending: true }),
       db.from("atletas").select("id, nome, sobrenome, idade, clube, telefone, user_id"),
     ]);
 
@@ -113,8 +128,12 @@ export const listarVisaoAdmin = createServerFn({ method: "GET" })
 export const atualizarSessaoAdmin = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .validator(
-    (dado: { agendamentoId: string; acao: "cancelar" | "remarcar"; novaData?: string; novoHorario?: string }) =>
-      dado,
+    (dado: {
+      agendamentoId: string;
+      acao: "cancelar" | "remarcar";
+      novaData?: string;
+      novoHorario?: string;
+    }) => dado,
   )
   .handler(async ({ data, context }) => {
     await exigirAdmin(context.userId);
@@ -159,7 +178,92 @@ export const trocarStatusSessaoProfissional = createServerFn({ method: "POST" })
     if (!sessao || sessao.profissional_slug !== perfil.profissional_slug) {
       throw new Error("Sessão não pertence ao seu consultório.");
     }
-    const { error } = await db.from("agendamentos").update({ status: data.status }).eq("id", data.agendamentoId);
+    const { error } = await db
+      .from("agendamentos")
+      .update({ status: data.status })
+      .eq("id", data.agendamentoId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Pacientes do consultório: atletas com contrato (exclui cancelados). */
+export const listarPacientesProfissional = createServerFn({ method: "GET" })
+  .middleware([requireAuth])
+  .handler(async ({ context }) => {
+    const perfil = await exigirProfissional(context.userId);
+    const db = await supabaseAdmin;
+
+    const { data: contratos } = await db
+      .from("contratos")
+      .select("id, atleta_id, pacote_slug, status, user_id")
+      .neq("status", "cancelado")
+      .order("created_at", { ascending: false });
+
+    const nomes = new Map<string, string>();
+    for (const c of contratos ?? []) {
+      if (!nomes.has(c.atleta_id)) {
+        const { data: atl } = await db
+          .from("atletas")
+          .select("nome, sobrenome")
+          .eq("id", c.atleta_id)
+          .maybeSingle();
+        if (atl) nomes.set(c.atleta_id, `${atl.nome} ${atl.sobrenome}`);
+      }
+    }
+
+    return {
+      profissionalSlug: perfil.profissional_slug ?? "amanda",
+      pacientes: (contratos ?? []).map((c) => ({
+        contratoId: c.id,
+        atletaNome: nomes.get(c.atleta_id) ?? "Atleta",
+        pacoteSlug: c.pacote_slug,
+        status: c.status,
+      })),
+    };
+  });
+
+/** Profissional marca um retorno com horário no próprio consultório. */
+export const criarRetornoProfissional = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator(
+    (dado: { contratoId: string; tipoSessao: string; data: string; horario: string }) => dado,
+  )
+  .handler(async ({ data, context }) => {
+    const perfil = await exigirProfissional(context.userId);
+    const slug = perfil.profissional_slug ?? "amanda";
+    const db = await supabaseAdmin;
+
+    const { data: contrato } = await db
+      .from("contratos")
+      .select("id, atleta_id, status")
+      .eq("id", data.contratoId)
+      .maybeSingle();
+    if (!contrato || contrato.status === "cancelado") {
+      throw new Error("Contrato não encontrado.");
+    }
+
+    // Slot ocupado? (mesmo profissional, mesma data e horário)
+    const { data: ocupados } = await db
+      .from("agendamentos")
+      .select("id")
+      .eq("data", data.data)
+      .eq("horario", data.horario)
+      .eq("profissional_slug", slug)
+      .in("status", ["agendado", "confirmado"]);
+    if (ocupados && ocupados.length > 0) {
+      throw new Error("Esse horário já está reservado. Escolha outro.");
+    }
+
+    const { error } = await db.from("agendamentos").insert({
+      contrato_id: data.contratoId,
+      atleta_id: contrato.atleta_id,
+      profissional_slug: slug,
+      tipo_sessao: data.tipoSessao,
+      data: data.data,
+      horario: data.horario,
+      duracao_min: 60,
+      status: "agendado",
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });

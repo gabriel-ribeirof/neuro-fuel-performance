@@ -1,10 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import {
   listarMinhaAgenda,
   trocarStatusSessaoProfissional,
+  listarPacientesProfissional,
+  criarRetornoProfissional,
 } from "@/lib/admin.server";
+import { buscarHorariosOcupados, type HorarioOcupado } from "@/lib/agendamentos.server";
+import {
+  dataParaChave,
+  ehDiaDeAtendimento,
+  horariosDisponiveis,
+  proximosDias,
+  type Horario,
+  type ProfissionalSlug,
+} from "@/lib/negocio";
+import { Calendar } from "@/components/ui/calendar";
 
 export const Route = createFileRoute("/profissional")({
   head: () => ({ meta: [{ title: "Agenda — Nutrição Neurofuncional iEsports" }] }),
@@ -31,14 +43,42 @@ function rotuloSessao(tipo: string): string {
     genetico: "Teste Genético",
     devolutiva: "Devolutiva de Laudo",
     multidisciplinar: "Sessão Multidisciplinar",
+    "retorno-neuro": "Retorno de Neuro",
+    "retorno-nutri": "Retorno de Nutri",
   };
   return mapa[tipo] ?? tipo;
 }
+
+const TIPOS_RETORNO: { tipo: string; rotulo: string }[] = [
+  { tipo: "retorno-neuro", rotulo: "Retorno de Neuro" },
+  { tipo: "retorno-nutri", rotulo: "Retorno de Nutri" },
+  { tipo: "neuro", rotulo: "Sessão de Neuro" },
+  { tipo: "nutri", rotulo: "Consulta Nutricional" },
+  { tipo: "psico", rotulo: "Sessão de Psicologia" },
+  { tipo: "devolutiva", rotulo: "Devolutiva de Laudo" },
+  { tipo: "multidisciplinar", rotulo: "Sessão Multidisciplinar" },
+];
 
 function ProfissionalPage() {
   const { user, carregando, perfilNome } = useAuth();
   const [sessoes, setSessoes] = useState<MinhaSessao[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+
+  // Estado do form de retorno
+  const [mostrandoForm, setMostrandoForm] = useState(false);
+  const [pacientes, setPacientes] = useState<
+    { contratoId: string; atletaNome: string; pacoteSlug: string; status: string }[]
+  >([]);
+  const [meuSlug, setMeuSlug] = useState<ProfissionalSlug>("amanda");
+  const [contratoId, setContratoId] = useState("");
+  const [tipoSessao, setTipoSessao] = useState("retorno-neuro");
+  const [dataEscolhida, setDataEscolhida] = useState<string | undefined>();
+  const [horarioEscolhido, setHorarioEscolhido] = useState<Horario | null>(null);
+  const [ocupados, setOcupados] = useState<HorarioOcupado[]>([]);
+  const [enviando, setEnviando] = useState(false);
+  const [sucesso, setSucesso] = useState("");
+
+  const dias = useMemo(() => proximosDias(30), []);
 
   function carregar() {
     setErro(null);
@@ -51,6 +91,33 @@ function ProfissionalPage() {
     if (!carregando && user) carregar();
   }, [carregando, user]);
 
+  // Carrega pacientes + horários ocupados do intervalo quando abre o form.
+  useEffect(() => {
+    if (!mostrandoForm) return;
+    listarPacientesProfissional()
+      .then((dados) => {
+        setMeuSlug(dados.profissionalSlug as ProfissionalSlug);
+        setPacientes(dados.pacientes);
+        setContratoId((atual) => atual || (dados.pacientes[0]?.contratoId ?? ""));
+      })
+      .catch((e) => setErro(e instanceof Error ? e.message : "Falha ao carregar pacientes."));
+
+    const inicio = dias[0]?.toISOString().slice(0, 10);
+    const fim = dias[dias.length - 1]?.toISOString().slice(0, 10);
+    if (inicio && fim) {
+      buscarHorariosOcupados({ data: { inicio, fim } }).then((dados) => setOcupados(dados));
+    }
+  }, [mostrandoForm, dias]);
+
+  // Limpa o horário quando a data muda.
+  useEffect(() => {
+    setHorarioEscolhido(null);
+  }, [dataEscolhida]);
+
+  const dataObj = dataEscolhida ? new Date(`${dataEscolhida}T12:00:00`) : undefined;
+  const horarios = dataObj ? horariosDisponiveis(dataObj, meuSlug, ocupados) : [];
+  const diasChave = useMemo(() => dias.map(dataParaChave), [dias]);
+
   async function trocarStatus(id: string, status: "realizado" | "cancelado") {
     setErro(null);
     try {
@@ -61,8 +128,42 @@ function ProfissionalPage() {
     }
   }
 
+  async function salvarRetorno() {
+    setErro(null);
+    setSucesso("");
+    if (!contratoId) {
+      setErro("Selecione o atleta para o retorno.");
+      return;
+    }
+    if (!dataEscolhida || !horarioEscolhido) {
+      setErro("Escolha data e horário para o retorno.");
+      return;
+    }
+    setEnviando(true);
+    try {
+      await criarRetornoProfissional({
+        data: {
+          contratoId,
+          tipoSessao,
+          data: dataEscolhida,
+          horario: horarioEscolhido,
+        },
+      });
+      setSucesso("Retorno marcado! O cliente já vê a sessão na área dele.");
+      setDataEscolhida(undefined);
+      setHorarioEscolhido(null);
+      setMostrandoForm(false);
+      carregar();
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Falha ao marcar retorno.");
+    }
+    setEnviando(false);
+  }
+
   if (carregando || !user || !sessoes) {
-    return <section className="mx-auto max-w-4xl px-6 py-20 text-sm text-cocoa">Carregando…</section>;
+    return (
+      <section className="mx-auto max-w-4xl px-6 py-20 text-sm text-cocoa">Carregando…</section>
+    );
   }
 
   const abertas = sessoes.filter((s) => s.status === "agendado" || s.status === "confirmado");
@@ -71,10 +172,130 @@ function ProfissionalPage() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-20">
       <p className="eyebrow">Agenda profissional</p>
-      <h1 className="mt-4 font-display text-4xl text-espresso">Olá, {perfilNome || "profissional"}</h1>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-display text-4xl text-espresso">Olá, {perfilNome || "profissional"}</h1>
+        <button
+          onClick={() => setMostrandoForm((v) => !v)}
+          className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-linen hover:bg-cocoa"
+        >
+          {mostrandoForm ? "Fechar" : "Marcar retorno"}
+        </button>
+      </div>
 
       {erro && (
-        <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">{erro}</p>
+        <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">
+          {erro}
+        </p>
+      )}
+      {sucesso && (
+        <p className="mt-6 rounded-xl border border-emerald-600/30 bg-emerald-600/5 px-4 py-3 text-xs text-emerald-800">
+          {sucesso}
+        </p>
+      )}
+
+      {mostrandoForm && (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-display text-2xl text-espresso">Marcar retorno</h2>
+          <p className="mt-1 text-sm text-cocoa">
+            A sessão entra na sua agenda e aparece automaticamente na área do cliente.
+          </p>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="paciente" className="mb-1.5 block text-sm text-cocoa">
+                  Atleta
+                </label>
+                <select
+                  id="paciente"
+                  value={contratoId}
+                  onChange={(e) => setContratoId(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+                >
+                  {pacientes.length === 0 && (
+                    <option value="">Nenhum atleta com contrato ativo</option>
+                  )}
+                  {pacientes.map((p) => (
+                    <option key={p.contratoId} value={p.contratoId}>
+                      {p.atletaNome} — {p.pacoteSlug.replace("-", " ")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="tipo" className="mb-1.5 block text-sm text-cocoa">
+                  Tipo de sessão
+                </label>
+                <select
+                  id="tipo"
+                  value={tipoSessao}
+                  onChange={(e) => setTipoSessao(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+                >
+                  {TIPOS_RETORNO.map((t) => (
+                    <option key={t.tipo} value={t.tipo}>
+                      {t.rotulo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <p className="mb-2 text-sm text-cocoa">Dia</p>
+                <Calendar
+                  mode="single"
+                  selected={dataObj}
+                  onSelect={(d) => d && setDataEscolhida(dataParaChave(d))}
+                  disabled={(d) =>
+                    !ehDiaDeAtendimento(d) ||
+                    d < new Date(new Date().toDateString()) ||
+                    !diasChave.includes(dataParaChave(d))
+                  }
+                  className="rounded-xl border border-border"
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-sm text-cocoa">Horário</p>
+                {horarios.length === 0 ? (
+                  <p className="rounded-xl border border-border px-4 py-3 text-xs text-cocoa">
+                    Nenhum horário disponível nesse dia.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {horarios.map((h) => (
+                      <button
+                        key={h}
+                        type="button"
+                        onClick={() => setHorarioEscolhido(h)}
+                        className={`rounded-xl border px-4 py-2.5 text-sm transition-colors ${
+                          horarioEscolhido === h
+                            ? "border-camel bg-espresso text-linen"
+                            : "border-border bg-background hover:border-camel"
+                        }`}
+                      >
+                        {h}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              disabled={enviando}
+              onClick={salvarRetorno}
+              className="rounded-full bg-espresso px-6 py-3 text-sm font-medium text-linen transition-colors hover:bg-cocoa disabled:opacity-50"
+            >
+              {enviando ? "Salvando…" : "Marcar retorno"}
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="mt-10">
@@ -86,10 +307,15 @@ function ProfissionalPage() {
         {abertas.length > 0 && (
           <div className="mt-4 space-y-3">
             {abertas.map((s) => (
-              <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4">
+              <div
+                key={s.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4"
+              >
                 <div>
                   <p className="text-sm font-medium text-espresso">{rotuloSessao(s.tipoSessao)}</p>
-                  <p className="mt-0.5 text-xs text-cocoa">{s.atletaNome} · {s.duracaoMin} min</p>
+                  <p className="mt-0.5 text-xs text-cocoa">
+                    {s.atletaNome} · {s.duracaoMin} min
+                  </p>
                 </div>
                 <div className="text-right text-sm text-cocoa">
                   <p>{new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")}</p>
@@ -119,13 +345,20 @@ function ProfissionalPage() {
             <h2 className="mt-10 font-display text-2xl text-espresso">Histórico</h2>
             <div className="mt-4 space-y-3">
               {finalizadas.map((s) => (
-                <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4 opacity-80">
+                <div
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4 opacity-80"
+                >
                   <div>
-                    <p className="text-sm font-medium text-espresso">{rotuloSessao(s.tipoSessao)}</p>
+                    <p className="text-sm font-medium text-espresso">
+                      {rotuloSessao(s.tipoSessao)}
+                    </p>
                     <p className="mt-0.5 text-xs text-cocoa">{s.atletaNome}</p>
                   </div>
                   <div className="text-right text-sm text-cocoa">
-                    <p>{new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")} · {s.horario}</p>
+                    <p>
+                      {new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")} · {s.horario}
+                    </p>
                     <p className="capitalize">{s.status}</p>
                   </div>
                 </div>
