@@ -319,26 +319,6 @@ function Index() {
         </div>
       </section>
 
-      {/* Values */}
-      <section className="bg-espresso text-linen">
-        <div className="mx-auto max-w-7xl px-6 py-24">
-          <Reveal>
-            <p className="text-[0.72rem] font-semibold tracking-[0.22em] text-camel uppercase">
-              Nosso DNA
-            </p>
-            <h2 className="mt-4 max-w-2xl text-4xl lg:text-5xl">Valores que sustentam o trabalho</h2>
-          </Reveal>
-          <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-            {values.map((v, i) => (
-              <Reveal key={v.title} delay={i * 70}>
-                <h3 className="text-2xl">{v.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-khaki">{v.text}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <Reveal>
@@ -389,16 +369,8 @@ function Index() {
 
       {/* Where */}
       <section id="onde" className="bg-khaki/60">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-24 md:grid-cols-2">
+        <div className="mx-auto max-w-7xl px-6 py-24">
           <Reveal>
-            <MapPin className="h-7 w-7 text-camel" strokeWidth={1.2} />
-            <h2 className="mt-5 text-3xl text-espresso">Base em São Paulo</h2>
-            <p className="mt-3 leading-relaxed text-cocoa">
-              Vista Verde Offices — Av. Queiroz Filho, 1560, Conj. 201, Vila Hamburguesa,
-              São Paulo/SP.
-            </p>
-          </Reveal>
-          <Reveal delay={100}>
             <Laptop className="h-7 w-7 text-camel" strokeWidth={1.2} />
             <h2 className="mt-5 text-3xl text-espresso">Atendimento 100% online</h2>
             <p className="mt-3 leading-relaxed text-cocoa">
