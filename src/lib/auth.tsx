@@ -168,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         idade: meta.atleta.idade,
         clube: meta.atleta.clube,
         email: null,
-        telefone: dadosTelefoneResponsavel(meta.responsavel),
+        telefone: meta.responsavel?.telefone ?? "",
       });
     }
   }
