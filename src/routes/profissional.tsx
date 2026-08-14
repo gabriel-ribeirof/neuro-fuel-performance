@@ -67,10 +67,10 @@ function ProfissionalPage() {
   // Estado do form de retorno
   const [mostrandoForm, setMostrandoForm] = useState(false);
   const [pacientes, setPacientes] = useState<
-    { contratoId: string; atletaNome: string; pacoteSlug: string; status: string }[]
+    { email: string; atletaNome: string; pacoteSlug: string; status: string }[]
   >([]);
   const [meuSlug, setMeuSlug] = useState<ProfissionalSlug>("amanda");
-  const [contratoId, setContratoId] = useState("");
+  const [emailCliente, setEmailCliente] = useState("");
   const [tipoSessao, setTipoSessao] = useState("retorno-neuro");
   const [dataEscolhida, setDataEscolhida] = useState<string | undefined>();
   const [horarioEscolhido, setHorarioEscolhido] = useState<Horario | null>(null);
@@ -98,7 +98,7 @@ function ProfissionalPage() {
       .then((dados) => {
         setMeuSlug(dados.profissionalSlug as ProfissionalSlug);
         setPacientes(dados.pacientes);
-        setContratoId((atual) => atual || (dados.pacientes[0]?.contratoId ?? ""));
+        setEmailCliente((atual) => atual || (dados.pacientes[0]?.email ?? ""));
       })
       .catch((e) => setErro(e instanceof Error ? e.message : "Falha ao carregar pacientes."));
 
@@ -131,8 +131,8 @@ function ProfissionalPage() {
   async function salvarRetorno() {
     setErro(null);
     setSucesso("");
-    if (!contratoId) {
-      setErro("Selecione o atleta para o retorno.");
+    if (!emailCliente.trim()) {
+      setErro("Informe o e-mail do cliente para marcar o retorno.");
       return;
     }
     if (!dataEscolhida || !horarioEscolhido) {
@@ -143,7 +143,7 @@ function ProfissionalPage() {
     try {
       await criarRetornoProfissional({
         data: {
-          contratoId,
+          email: emailCliente.trim(),
           tipoSessao,
           data: dataEscolhida,
           horario: horarioEscolhido,
@@ -204,23 +204,31 @@ function ProfissionalPage() {
             <div className="space-y-5">
               <div>
                 <label htmlFor="paciente" className="mb-1.5 block text-sm text-cocoa">
-                  Atleta
+                  E-mail do cliente
                 </label>
-                <select
+                <input
                   id="paciente"
-                  value={contratoId}
-                  onChange={(e) => setContratoId(e.target.value)}
+                  list="clientes-cadastrados"
+                  type="email"
+                  placeholder="email.do.cliente@exemplo.com"
+                  value={emailCliente}
+                  onChange={(e) => setEmailCliente(e.target.value)}
                   className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
-                >
-                  {pacientes.length === 0 && (
-                    <option value="">Nenhum atleta com contrato ativo</option>
-                  )}
-                  {pacientes.map((p) => (
-                    <option key={p.contratoId} value={p.contratoId}>
-                      {p.atletaNome} — {p.pacoteSlug.replace("-", " ")}
-                    </option>
-                  ))}
-                </select>
+                />
+                <datalist id="clientes-cadastrados">
+                  {pacientes
+                    .filter((p) => p.email)
+                    .map((p) => (
+                      <option key={p.email} value={p.email}>
+                        {p.atletaNome}
+                      </option>
+                    ))}
+                </datalist>
+                {pacientes.length === 0 && (
+                  <p className="mt-1.5 text-xs text-cocoa">
+                    Nenhum cliente com contrato ativo cadastrado ainda.
+                  </p>
+                )}
               </div>
 
               <div>

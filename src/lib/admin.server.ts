@@ -200,6 +200,7 @@ export const listarPacientesProfissional = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
 
     const nomes = new Map<string, string>();
+    const emails = new Map<string, string>();
     for (const c of contratos ?? []) {
       if (!nomes.has(c.atleta_id)) {
         const { data: atl } = await db
@@ -209,12 +210,16 @@ export const listarPacientesProfissional = createServerFn({ method: "GET" })
           .maybeSingle();
         if (atl) nomes.set(c.atleta_id, `${atl.nome} ${atl.sobrenome}`);
       }
+      if (!emails.has(c.user_id)) {
+        const { data: ud } = await db.auth.admin.getUserById(c.user_id);
+        emails.set(c.user_id, ud?.user?.email ?? "");
+      }
     }
 
     return {
       profissionalSlug: perfil.profissional_slug ?? "amanda",
       pacientes: (contratos ?? []).map((c) => ({
-        contratoId: c.id,
+        email: emails.get(c.user_id) ?? "",
         atletaNome: nomes.get(c.atleta_id) ?? "Atleta",
         pacoteSlug: c.pacote_slug,
         status: c.status,
@@ -225,22 +230,27 @@ export const listarPacientesProfissional = createServerFn({ method: "GET" })
 /** Profissional marca um retorno com horário no próprio consultório. */
 export const criarRetornoProfissional = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator(
-    (dado: { contratoId: string; tipoSessao: string; data: string; horario: string }) => dado,
-  )
+  .validator((dado: { email: string; tipoSessao: string; data: string; horario: string }) => dado)
   .handler(async ({ data, context }) => {
     const perfil = await exigirProfissional(context.userId);
     const slug = perfil.profissional_slug ?? "amanda";
     const db = await supabaseAdmin;
 
+    const email = data.email.trim().toLowerCase();
+    if (!email) throw new Error("Informe o e-mail do cliente.");
+
+    const { data: usuarios } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const usuario = usuarios?.users?.find((u) => u.email?.toLowerCase() === email);
+    if (!usuario) throw new Error("Nenhum cliente cadastrado com esse e-mail.");
+
     const { data: contrato } = await db
       .from("contratos")
       .select("id, atleta_id, status")
-      .eq("id", data.contratoId)
+      .eq("user_id", usuario.id)
+      .neq("status", "cancelado")
+      .order("created_at", { ascending: false })
       .maybeSingle();
-    if (!contrato || contrato.status === "cancelado") {
-      throw new Error("Contrato não encontrado.");
-    }
+    if (!contrato) throw new Error("Esse cliente ainda não tem contrato ativo.");
 
     // Slot ocupado? (mesmo profissional, mesma data e horário)
     const { data: ocupados } = await db
@@ -255,7 +265,7 @@ export const criarRetornoProfissional = createServerFn({ method: "POST" })
     }
 
     const { error } = await db.from("agendamentos").insert({
-      contrato_id: data.contratoId,
+      contrato_id: contrato.id,
       atleta_id: contrato.atleta_id,
       profissional_slug: slug,
       tipo_sessao: data.tipoSessao,
