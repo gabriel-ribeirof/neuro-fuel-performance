@@ -14,8 +14,6 @@ export type DadosAtleta = {
   sobrenome: string;
   idade: number;
   clube: string;
-  email?: string;
-  telefone: string;
 };
 
 type AuthContextValue = {
@@ -169,8 +167,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sobrenome: meta.atleta.sobrenome,
         idade: meta.atleta.idade,
         clube: meta.atleta.clube,
-        email: meta.atleta.email ?? null,
-        telefone: meta.atleta.telefone,
+        email: null,
+        telefone: dadosTelefoneResponsavel(meta.responsavel),
       });
     }
   }
