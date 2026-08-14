@@ -75,7 +75,6 @@ export const PACOTES: Pacote[] = [
     slug: "plus-genetico",
     nome: "Plus com Teste Genético",
     chamada: "Pacote Plus + teste genético + devolutiva",
-    nota: "Valor do teste genético: R$ 4.500",
     valorCentavos: 649_000,
     sessoes: [
       { tipo: "neuro", rotulo: "2 Neuro", profissional: "amanda" },
