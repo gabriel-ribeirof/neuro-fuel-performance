@@ -7,6 +7,19 @@ export const Route = createFileRoute("/cadastro")({
   component: CadastroPage,
 });
 
+const CLUBES = [
+  "Grêmio",
+  "Botafogo",
+  "Fluminense",
+  "Vasco",
+  "Coritiba",
+  "Palmeiras",
+  "Santos",
+  "Bahia",
+  "Sport",
+  "ABC",
+];
+
 function Campo({
   id,
   label,
@@ -58,9 +71,7 @@ function CadastroPage() {
   const [atNome, setAtNome] = useState("");
   const [atSobrenome, setAtSobrenome] = useState("");
   const [atIdade, setAtIdade] = useState("");
-  const [atClube, setAtClube] = useState("");
-  const [atEmail, setAtEmail] = useState("");
-  const [atTelefone, setAtTelefone] = useState("");
+  const [atClubes, setAtClubes] = useState<string[]>([]);
 
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -83,11 +94,8 @@ function CadastroPage() {
       nome: atNome.trim(),
       sobrenome: atSobrenome.trim(),
       idade,
-      clube: atClube.trim(),
-      telefone: atTelefone.trim(),
+      clube: atClubes.join(", "),
     };
-    const emailAtleta = atEmail.trim();
-    if (emailAtleta) atleta.email = emailAtleta;
 
     const resultado = await cadastrar(email.trim(), senha, { nome, telefone }, atleta);
 
@@ -128,13 +136,29 @@ function CadastroPage() {
             <Campo id="at-nome" label="Nome" value={atNome} onChange={setAtNome} required />
             <Campo id="at-sobrenome" label="Sobrenome" value={atSobrenome} onChange={setAtSobrenome} required />
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Campo id="at-idade" label="Idade" type="number" inputMode="numeric" value={atIdade} onChange={setAtIdade} required />
-            <Campo id="at-clube" label="Clube/Time" value={atClube} onChange={setAtClube} placeholder="Ex.: Vivo Keyd, LOS…" />
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Campo id="at-email" label="E-mail do atleta (opcional)" type="email" value={atEmail} onChange={setAtEmail} />
-            <Campo id="at-telefone" label="Celular do atleta" type="tel" value={atTelefone} onChange={setAtTelefone} placeholder="(11) 98888-8888" />
+          <Campo id="at-idade" label="Idade" type="number" inputMode="numeric" value={atIdade} onChange={setAtIdade} required />
+
+          <div>
+            <p className="mb-1.5 text-sm text-cocoa">Clube/Time (pode marcar mais de um)</p>
+            <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-4 sm:grid-cols-3">
+              {CLUBES.map((clube) => (
+                <label key={clube} className="flex items-center gap-2 text-sm text-cocoa">
+                  <input
+                    type="checkbox"
+                    checked={atClubes.includes(clube)}
+                    onChange={(e) =>
+                      setAtClubes((atual) =>
+                        e.target.checked
+                          ? [...atual, clube]
+                          : atual.filter((c) => c !== clube),
+                      )
+                    }
+                    className="h-4 w-4 accent-camel"
+                  />
+                  {clube}
+                </label>
+              ))}
+            </div>
           </div>
         </fieldset>
 

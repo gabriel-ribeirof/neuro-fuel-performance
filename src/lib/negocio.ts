@@ -99,6 +99,17 @@ export const PACOTES: Pacote[] = [
       { tipo: "retorno-nutri", rotulo: "1 retorno Nutri", profissional: "leticia" },
     ],
   },
+  {
+    slug: "genetico-avulso",
+    nome: "Teste Genético avulso",
+    chamada: "Teste genético e de metabolômica sem pacote",
+    nota: "Pode ser contratado separadamente, sem precisar de pacote.",
+    valorCentavos: 450_000,
+    sessoes: [
+      { tipo: "genetico", rotulo: "Teste Genético e de Metabolômica", profissional: "amanda" },
+      { tipo: "devolutiva", rotulo: "Devolutiva do laudo (60 páginas, 270 genes)", profissional: "amanda" },
+    ],
+  },
 ];
 
 export function getPacote(slug: string): Pacote | undefined {

@@ -9,7 +9,6 @@ import {
   Dna,
   HeartHandshake,
   Laptop,
-  MapPin,
   Play,
   Quote,
   Sparkles,
@@ -67,7 +66,7 @@ const steps = [
   { n: "02", title: "Pagamento", text: "Confirmação segura e liberação imediata da agenda." },
   { n: "03", title: "Anamnese e histórico completo do paciente", text: "Avaliação detalhada e histórico de performance com a equipe." },
   { n: "04", title: "Avaliação nutricional completa", text: "Análise nutricional individualizada para o esporte." },
-  { n: "05", title: "Sessões com o Gabriel", text: "4 atendimentos visando a performance esportiva." },
+  { n: "05", title: "Sessões de performance", text: "4 atendimentos visando a performance esportiva." },
   { n: "06", title: "Acompanhamento contínuo", text: "Ajustes, retornos e suporte durante toda a jornada." },
 ];
 
@@ -82,7 +81,8 @@ const packages = [
   { name: "Inicial", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
   { name: "Plus Atletas", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
   { name: "Plus com Teste Genético", price: "R$ 6.490", items: ["Pacote Plus + teste genético + devolutiva", "Valor do teste genético: R$ 4.500"] },
-  { name: "Plus Pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro (Amanda)", "1 retorno Neuro + 1 retorno Nutri"] },
+  { name: "Plus Pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
+  { name: "Teste Genético avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
 ];
 
 const team = [
@@ -90,14 +90,6 @@ const team = [
   { name: "Manuela Gestal", role: "Neuronutricionista · Nutrigeneticista · Psicanalista", img: manuelaImg },
   { name: "Letícia Frazão", role: "Nutricionista esportiva", img: leticiaImg },
   { name: "Gabriel Fernandes", role: "Auxiliar de atendimentos", img: gabrielImg },
-];
-
-const values = [
-  { title: "Ética e respeito", text: "Cada atleta é tratado com transparência e sigilo absoluto." },
-  { title: "Segurança e bem-estar", text: "Nenhum resultado justifica risco à saúde do atleta." },
-  { title: "Atualização constante", text: "Ciência atual aplicada à prática esportiva real." },
-  { title: "Acompanhamento próximo", text: "Presença durante toda a temporada, não apenas na consulta." },
-  { title: "Compromisso e profissionalismo", text: "Padrão internacional em cada etapa do processo." },
 ];
 
 const testimonials = [
@@ -326,26 +318,6 @@ function Index() {
         </div>
       </section>
 
-      {/* Values */}
-      <section className="bg-espresso text-linen">
-        <div className="mx-auto max-w-7xl px-6 py-24">
-          <Reveal>
-            <p className="text-[0.72rem] font-semibold tracking-[0.22em] text-camel uppercase">
-              Nosso DNA
-            </p>
-            <h2 className="mt-4 max-w-2xl text-4xl lg:text-5xl">Valores que sustentam o trabalho</h2>
-          </Reveal>
-          <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-            {values.map((v, i) => (
-              <Reveal key={v.title} delay={i * 70}>
-                <h3 className="text-2xl">{v.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-khaki">{v.text}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <Reveal>
@@ -396,16 +368,8 @@ function Index() {
 
       {/* Where */}
       <section id="onde" className="bg-khaki/60">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-24 md:grid-cols-2">
+        <div className="mx-auto max-w-7xl px-6 py-24">
           <Reveal>
-            <MapPin className="h-7 w-7 text-camel" strokeWidth={1.2} />
-            <h2 className="mt-5 text-3xl text-espresso">Base em São Paulo</h2>
-            <p className="mt-3 leading-relaxed text-cocoa">
-              Vista Verde Offices — Av. Queiroz Filho, 1560, Conj. 201, Vila Hamburguesa,
-              São Paulo/SP.
-            </p>
-          </Reveal>
-          <Reveal delay={100}>
             <Laptop className="h-7 w-7 text-camel" strokeWidth={1.2} />
             <h2 className="mt-5 text-3xl text-espresso">Atendimento 100% online</h2>
             <p className="mt-3 leading-relaxed text-cocoa">

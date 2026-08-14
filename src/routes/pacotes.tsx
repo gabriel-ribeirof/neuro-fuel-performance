@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { PACOTES, formatarValor, nomeProfissional, type Pacote } from "@/lib/negocio";
+import { PACOTES, formatarValor, type Pacote } from "@/lib/negocio";
 import { criarContratoEIniciarPagamento } from "@/lib/contratos.server";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,9 +43,7 @@ function CartaoPacote({
         {pacote.sessoes.map((s) => (
           <li key={s.rotulo} className="flex gap-2">
             <span className="mt-0.5 text-camel">•</span>
-            <span>
-              {s.rotulo} — <span className="text-camel">{nomeProfissional(s.profissional)}</span>
-            </span>
+            <span>{s.rotulo}</span>
           </li>
         ))}
       </ul>
@@ -139,8 +137,8 @@ function PacotesPage() {
       <p className="eyebrow">Pacotes</p>
       <h1 className="mt-4 font-display text-4xl text-espresso">Escolha seu acompanhamento</h1>
       <p className="mt-3 max-w-2xl text-sm text-cocoa">
-        Todos os pacotes incluem a avaliação inicial com Amanda (anamnese de neuro) e a
-        avaliação nutricional com Letícia na mesma semana. Pagamento via Mercado Pago.
+        Todos os pacotes incluem a anamnese de neuro e a avaliação nutricional na mesma
+        semana. O teste genético também pode ser contratado avulso. Pagamento via Mercado Pago.
       </p>
 
       {user && !carregandoAtletas && atletas.length > 0 && (

@@ -69,10 +69,9 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="text-sm text-khaki">
-          <p className="text-linen">Local</p>
-          <p className="mt-3">Vista Verde Offices</p>
-          <p className="mt-1">Av. Queiroz Filho, 1560, Conj. 201</p>
-          <p className="mt-1">Vila Hamburguesa, São Paulo/SP</p>
+          <p className="text-linen">Atendimento</p>
+          <p className="mt-3">100% online</p>
+          <p className="mt-1">Atletas de todo o Brasil e do exterior</p>
         </div>
         <div className="text-sm text-khaki">
           <p className="text-linen">Acesso</p>
