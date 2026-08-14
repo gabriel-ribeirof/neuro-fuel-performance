@@ -9,7 +9,6 @@ import {
   Dna,
   HeartHandshake,
   Laptop,
-  MapPin,
   Play,
   Quote,
   Sparkles,
