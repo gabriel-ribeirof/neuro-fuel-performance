@@ -67,7 +67,7 @@ const steps = [
   { n: "02", title: "Pagamento", text: "Confirmação segura e liberação imediata da agenda." },
   { n: "03", title: "Anamnese e histórico completo do paciente", text: "Avaliação detalhada e histórico de performance com a equipe." },
   { n: "04", title: "Avaliação nutricional completa", text: "Análise nutricional individualizada para o esporte." },
-  { n: "05", title: "Sessões com o Gabriel", text: "4 atendimentos visando a performance esportiva." },
+  { n: "05", title: "Sessões de performance", text: "4 atendimentos visando a performance esportiva." },
   { n: "06", title: "Acompanhamento contínuo", text: "Ajustes, retornos e suporte durante toda a jornada." },
 ];
 
@@ -82,7 +82,8 @@ const packages = [
   { name: "Inicial", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
   { name: "Plus Atletas", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
   { name: "Plus com Teste Genético", price: "R$ 6.490", items: ["Pacote Plus + teste genético + devolutiva", "Valor do teste genético: R$ 4.500"] },
-  { name: "Plus Pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro (Amanda)", "1 retorno Neuro + 1 retorno Nutri"] },
+  { name: "Plus Pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
+  { name: "Teste Genético avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
 ];
 
 const team = [
@@ -90,14 +91,6 @@ const team = [
   { name: "Manuela Gestal", role: "Neuronutricionista · Nutrigeneticista · Psicanalista", img: manuelaImg },
   { name: "Letícia Frazão", role: "Nutricionista esportiva", img: leticiaImg },
   { name: "Gabriel Fernandes", role: "Auxiliar de atendimentos", img: gabrielImg },
-];
-
-const values = [
-  { title: "Ética e respeito", text: "Cada atleta é tratado com transparência e sigilo absoluto." },
-  { title: "Segurança e bem-estar", text: "Nenhum resultado justifica risco à saúde do atleta." },
-  { title: "Atualização constante", text: "Ciência atual aplicada à prática esportiva real." },
-  { title: "Acompanhamento próximo", text: "Presença durante toda a temporada, não apenas na consulta." },
-  { title: "Compromisso e profissionalismo", text: "Padrão internacional em cada etapa do processo." },
 ];
 
 const testimonials = [
