@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useGuardaAcesso } from "@/lib/guards";
 import { listarMeusContratos } from "@/lib/contratos.server";
 import {
   agendarAnamnese,
@@ -49,6 +50,7 @@ function AgendamentoPage() {
   const navigate = useNavigate();
 
   const { user, carregando: authCarregando } = useAuth();
+  useGuardaAcesso(["responsavel"], "/login");
   const [contratos, setContratos] = useState<ContratoResumo[]>([]);
   const [carregandoContratos, setCarregandoContratos] = useState(true);
 

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useGuardaAcesso } from "@/lib/guards";
 import {
   listarMinhaAgenda,
   trocarStatusSessaoProfissional,
@@ -61,6 +62,7 @@ const TIPOS_RETORNO: { tipo: string; rotulo: string }[] = [
 
 function ProfissionalPage() {
   const { user, carregando, perfilNome } = useAuth();
+  useGuardaAcesso(["profissional", "admin"], "/acesso-equipe");
   const [sessoes, setSessoes] = useState<MinhaSessao[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
