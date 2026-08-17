@@ -131,7 +131,110 @@ function AdminPage() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-20">
       <p className="eyebrow">Painel administrativo</p>
-      <h1 className="mt-4 font-display text-4xl text-espresso">Admin — {perfilNome || "gestão"}</h1>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-display text-4xl text-espresso">Admin — {perfilNome || "gestão"}</h1>
+        <button
+          onClick={() => setMostrandoRetorno((v) => !v)}
+          className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-linen hover:bg-cocoa"
+        >
+          {mostrandoRetorno ? "Fechar" : "Marcar retorno"}
+        </button>
+      </div>
+
+      {sucesso && (
+        <p className="mt-6 rounded-xl border border-emerald-600/30 bg-emerald-600/5 px-4 py-3 text-xs text-emerald-800">
+          {sucesso}
+        </p>
+      )}
+
+      {mostrandoRetorno && (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-display text-2xl text-espresso">Marcar retorno</h2>
+          <p className="mt-1 text-sm text-cocoa">
+            Identificamos o cliente pelo e-mail cadastrado; a sessão aparece na área dele.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="email-cliente" className="mb-1.5 block text-sm text-cocoa">E-mail do cliente</label>
+              <input
+                id="email-cliente"
+                list="clientes-admin"
+                type="email"
+                value={emailCliente}
+                onChange={(e) => setEmailCliente(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+              />
+              <datalist id="clientes-admin">
+                {visao.contratos.map((c) => (
+                  <option key={c.id} value={c.responsavelEmail}>
+                    {c.atletaNome}
+                  </option>
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <label htmlFor="prof" className="mb-1.5 block text-sm text-cocoa">Profissional responsável</label>
+              <select
+                id="prof"
+                value={profSlug}
+                onChange={(e) => setProfSlug(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+              >
+                {PROFISSIONAIS.map((p) => (
+                  <option key={p.slug} value={p.slug}>
+                    {p.nome} — {p.especialidade}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="tipo" className="mb-1.5 block text-sm text-cocoa">Tipo de sessão</label>
+              <select
+                id="tipo"
+                value={tipoRetorno}
+                onChange={(e) => setTipoRetorno(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+              >
+                {TIPOS_RETORNO.map((t) => (
+                  <option key={t.tipo} value={t.tipo}>{t.rotulo}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="data-ret" className="mb-1.5 block text-sm text-cocoa">Data</label>
+                <input
+                  id="data-ret"
+                  type="date"
+                  value={dataRetorno}
+                  onChange={(e) => setDataRetorno(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+                />
+              </div>
+              <div>
+                <label htmlFor="hora-ret" className="mb-1.5 block text-sm text-cocoa">Horário</label>
+                <select
+                  id="hora-ret"
+                  value={horaRetorno}
+                  onChange={(e) => setHoraRetorno(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+                >
+                  {HORARIOS.map((h) => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={salvarRetorno}
+            disabled={enviando}
+            className="mt-6 rounded-full bg-espresso px-6 py-2.5 text-sm font-medium text-linen hover:bg-cocoa disabled:opacity-60"
+          >
+            {enviando ? "Salvando…" : "Confirmar retorno"}
+          </button>
+        </div>
+      )}
 
       {erro && (
         <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">{erro}</p>
