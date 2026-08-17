@@ -29,20 +29,20 @@ import gabrielImg from "@/assets/team-gabriel.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nutrição Neurofuncional iEsports | Neuronutrição para atletas" },
+      { title: "Nutrição Neurofuncional iEsports | Nutrição Neurofuncional para atletas" },
       {
         name: "description",
         content:
-          "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
+          "Nutrição Neurofuncional, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
       },
       {
         property: "og:title",
-        content: "Nutrição Neurofuncional iEsports | Neuronutrição para atletas",
+        content: "Nutrição Neurofuncional iEsports | Nutrição Neurofuncional para atletas",
       },
       {
         property: "og:description",
         content:
-          "Neuronutrição, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
+          "Nutrição Neurofuncional, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
       },
     ],
   }),
@@ -72,7 +72,7 @@ const steps = [
 
 const services = [
   { icon: UtensilsCrossed, title: "Consulta Nutricional", text: "Avaliação, plano alimentar e estratégia de composição corporal para o esporte." },
-  { icon: Brain, title: "Consulta Neuronutricional", text: "Nutrientes, foco, sono e regulação emocional aplicados à performance." },
+  { icon: Brain, title: "Consulta de Nutrição Neurofuncional", text: "Nutrientes, foco, sono e regulação emocional aplicados à performance." },
   { icon: Dna, title: "Teste Genético e Metabolômica", text: "Leitura individual do metabolismo para decisões precisas de nutrição." },
   { icon: HeartHandshake, title: "Sessões Individuais", text: "Performance cognitiva, emocional e comportamental com psicologia do esporte." },
 ];
@@ -86,8 +86,8 @@ const packages = [
 ];
 
 const team = [
-  { name: "Amanda Ciaramicoli", role: "Neuronutricionista · Nutrigeneticista · Psicanalista", img: amandaImg },
-  { name: "Manuela Gestal", role: "Neuronutricionista · Nutrigeneticista · Psicanalista", img: manuelaImg },
+  { name: "Amanda Ciaramicoli", role: "Nutricionista Neurofuncional · Nutrigeneticista · Psicanalista", img: amandaImg },
+  { name: "Manuela Gestal", role: "Nutricionista Neurofuncional · Nutrigeneticista · Psicanalista", img: manuelaImg },
   { name: "Letícia Frazão", role: "Nutricionista esportiva", img: leticiaImg },
   { name: "Gabriel Fernandes", role: "Auxiliar de atendimentos", img: gabrielImg },
 ];
@@ -124,7 +124,7 @@ function Index() {
       {/* Hero */}
       <section id="top" className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-20 lg:grid-cols-2 lg:py-28">
         <Reveal>
-          <p className="eyebrow">Neuronutrição esportiva</p>
+          <p className="eyebrow">Nutrição Neurofuncional esportiva</p>
           <h1 className="mt-6 text-5xl leading-[1.05] font-normal text-espresso lg:text-7xl">
             A mente do atleta<br />
             também se <em className="italic text-camel">nutre</em>.
@@ -189,10 +189,10 @@ function Index() {
                 height={912}
                 className="h-[420px] w-full rounded-[2rem] object-cover"
               />
-              {/* Vídeo da Amanda explicando a neuronutrição */}
+              {/* Vídeo da Amanda explicando a nutrição neurofuncional */}
               <button
                 type="button"
-                aria-label="Assistir vídeo: Amanda explica a neuronutrição"
+                aria-label="Assistir vídeo: Amanda explica a nutrição neurofuncional"
                 className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-espresso/30"
               >
                 <span className="flex h-20 w-20 items-center justify-center rounded-full bg-linen text-espresso shadow-xl transition-transform hover:scale-105">
@@ -207,7 +207,7 @@ function Index() {
               Alimentação que conversa com o cérebro
             </h2>
             <p className="mt-6 leading-relaxed text-cocoa">
-              A neuronutrição estuda como nutrientes, microbiota e rotina alimentar influenciam
+              A nutrição neurofuncional estuda como nutrientes, microbiota e rotina alimentar influenciam
               foco, tempo de reação, humor, sono e recuperação. No esporte de alto rendimento, essa
               conexão define a diferença entre treinar bem e competir bem.
             </p>

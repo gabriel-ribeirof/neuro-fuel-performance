@@ -14,8 +14,8 @@ export type Profissional = {
 };
 
 export const PROFISSIONAIS: Profissional[] = [
-  { slug: "amanda", nome: "Amanda Ciaramicoli", especialidade: "Neuronutricionista", whatsapp: "5511984975662" },
-  { slug: "manuela", nome: "Manuela Gestal", especialidade: "Neuronutricionista", whatsapp: "5511936212928" },
+  { slug: "amanda", nome: "Amanda Ciaramicoli", especialidade: "Nutricionista Neurofuncional", whatsapp: "5511984975662" },
+  { slug: "manuela", nome: "Manuela Gestal", especialidade: "Nutricionista Neurofuncional", whatsapp: "5511936212928" },
   { slug: "leticia", nome: "Letícia Frazão", especialidade: "Nutricionista esportiva", whatsapp: "5521981226038" },
   { slug: "gabriel", nome: "Gabriel Fernandes", especialidade: "Auxiliar de atendimentos", whatsapp: "5521996864747" },
 ];
