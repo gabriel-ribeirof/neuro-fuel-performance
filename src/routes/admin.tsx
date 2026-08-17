@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useGuardaAcesso } from "@/lib/guards";
 import {
   listarVisaoAdmin,
   atualizarSessaoAdmin,
+  criarRetornoProfissional,
   type listarMinhaAgenda,
 } from "@/lib/admin.server";
-import { formatarValor, nomeProfissional } from "@/lib/negocio";
+import { formatarValor, nomeProfissional, PROFISSIONAIS, HORARIOS } from "@/lib/negocio";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Painel admin — Nutrição Neurofuncional iEsports" }] }),
@@ -30,13 +32,61 @@ function rotuloSessao(tipo: string): string {
   return mapa[tipo] ?? tipo;
 }
 
+const TIPOS_RETORNO: { tipo: string; rotulo: string }[] = [
+  { tipo: "retorno-neuro", rotulo: "Retorno de Neuro" },
+  { tipo: "retorno-nutri", rotulo: "Retorno de Nutri" },
+  { tipo: "neuro", rotulo: "Sessão de Neuro" },
+  { tipo: "nutri", rotulo: "Consulta Nutricional" },
+  { tipo: "psico", rotulo: "Sessão de Psicologia" },
+  { tipo: "devolutiva", rotulo: "Devolutiva de Laudo" },
+  { tipo: "multidisciplinar", rotulo: "Sessão Multidisciplinar" },
+];
+
 function AdminPage() {
   const { user, carregando, perfilNome } = useAuth();
+  useGuardaAcesso(["admin"], "/acesso-equipe");
   const [visao, setVisao] = useState<VisaoAdmin | null>(null);
   const [remarcandoId, setRemarcandoId] = useState<string | null>(null);
   const [novaData, setNovaData] = useState("");
   const [novoHorario, setNovoHorario] = useState("");
   const [erro, setErro] = useState<string | null>(null);
+  const [sucesso, setSucesso] = useState("");
+  const [mostrandoRetorno, setMostrandoRetorno] = useState(false);
+  const [emailCliente, setEmailCliente] = useState("");
+  const [profSlug, setProfSlug] = useState<string>("amanda");
+  const [tipoRetorno, setTipoRetorno] = useState<string>("retorno-neuro");
+  const [dataRetorno, setDataRetorno] = useState("");
+  const [horaRetorno, setHoraRetorno] = useState<string>("09:00");
+  const [enviando, setEnviando] = useState(false);
+
+  async function salvarRetorno() {
+    setErro(null);
+    setSucesso("");
+    if (!emailCliente.trim() || !dataRetorno || !horaRetorno) {
+      setErro("Informe e-mail do cliente, data e horário.");
+      return;
+    }
+    setEnviando(true);
+    try {
+      await criarRetornoProfissional({
+        data: {
+          email: emailCliente.trim(),
+          tipoSessao: tipoRetorno,
+          data: dataRetorno,
+          horario: horaRetorno,
+          profissionalSlug: profSlug,
+        },
+      });
+      setSucesso("Retorno marcado! O cliente já vê a sessão na área dele.");
+      setEmailCliente("");
+      setDataRetorno("");
+      setMostrandoRetorno(false);
+      carregar();
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Falha ao marcar retorno.");
+    }
+    setEnviando(false);
+  }
 
   function carregar() {
     setErro(null);
