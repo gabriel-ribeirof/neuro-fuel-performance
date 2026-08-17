@@ -21,9 +21,9 @@ import { useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import heroImg from "@/assets/hero.jpg";
 import neuroImg from "@/assets/neuro.jpg";
-import amandaImg from "@/assets/team-amanda.jpg";
-import manuelaImg from "@/assets/team-manuela.jpg";
-import leticiaImg from "@/assets/team-leticia.jpg";
+import amandaAsset from "@/assets/team-amanda.jpg.asset.json";
+import manuelaAsset from "@/assets/team-manuela.jpg.asset.json";
+import leticiaAsset from "@/assets/team-leticia.jpg.asset.json";
 import gabrielImg from "@/assets/team-gabriel.jpg";
 
 export const Route = createFileRoute("/")({
@@ -86,9 +86,9 @@ const packages = [
 ];
 
 const team = [
-  { name: "Amanda Ciaramicoli", role: "Nutricionista Neurofuncional · Nutrigeneticista · Psicanalista", img: amandaImg },
-  { name: "Manuela Gestal", role: "Nutricionista Neurofuncional · Nutrigeneticista · Psicanalista", img: manuelaImg },
-  { name: "Letícia Frazão", role: "Nutricionista esportiva", img: leticiaImg },
+  { name: "Amanda Ciaramicoli", role: "Nutricionista Neurofuncional · Nutrigeneticista · Psicanalista", img: amandaAsset.url },
+  { name: "Manuela Gestal", role: "Nutricionista Neurofuncional · Nutrigeneticista · Psicanalista", img: manuelaAsset.url },
+  { name: "Letícia Frazão", role: "Nutricionista esportiva", img: leticiaAsset.url },
   { name: "Gabriel Fernandes", role: "Auxiliar de atendimentos", img: gabrielImg },
 ];
 
