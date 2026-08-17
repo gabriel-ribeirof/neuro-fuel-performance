@@ -64,7 +64,7 @@ export function SiteFooter() {
             iEsports <span className="text-camel">Nutri</span>
           </p>
           <p className="mt-4 max-w-xs text-sm text-khaki">
-            Nutrição Neurofuncional iEsports — neuronutrição e saúde mental esportiva para atletas
+            Nutrição Neurofuncional iEsports — nutrição neurofuncional e saúde mental esportiva para atletas
             aprovados no Experience.
           </p>
         </div>

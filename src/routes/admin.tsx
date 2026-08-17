@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useGuardaAcesso } from "@/lib/guards";
 import {
   listarVisaoAdmin,
   atualizarSessaoAdmin,
+  criarRetornoProfissional,
   type listarMinhaAgenda,
 } from "@/lib/admin.server";
-import { formatarValor, nomeProfissional } from "@/lib/negocio";
+import { formatarValor, nomeProfissional, PROFISSIONAIS, HORARIOS } from "@/lib/negocio";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Painel admin — Nutrição Neurofuncional iEsports" }] }),
@@ -30,13 +32,61 @@ function rotuloSessao(tipo: string): string {
   return mapa[tipo] ?? tipo;
 }
 
+const TIPOS_RETORNO: { tipo: string; rotulo: string }[] = [
+  { tipo: "retorno-neuro", rotulo: "Retorno de Neuro" },
+  { tipo: "retorno-nutri", rotulo: "Retorno de Nutri" },
+  { tipo: "neuro", rotulo: "Sessão de Neuro" },
+  { tipo: "nutri", rotulo: "Consulta Nutricional" },
+  { tipo: "psico", rotulo: "Sessão de Psicologia" },
+  { tipo: "devolutiva", rotulo: "Devolutiva de Laudo" },
+  { tipo: "multidisciplinar", rotulo: "Sessão Multidisciplinar" },
+];
+
 function AdminPage() {
   const { user, carregando, perfilNome } = useAuth();
+  useGuardaAcesso(["admin"], "/acesso-equipe");
   const [visao, setVisao] = useState<VisaoAdmin | null>(null);
   const [remarcandoId, setRemarcandoId] = useState<string | null>(null);
   const [novaData, setNovaData] = useState("");
   const [novoHorario, setNovoHorario] = useState("");
   const [erro, setErro] = useState<string | null>(null);
+  const [sucesso, setSucesso] = useState("");
+  const [mostrandoRetorno, setMostrandoRetorno] = useState(false);
+  const [emailCliente, setEmailCliente] = useState("");
+  const [profSlug, setProfSlug] = useState<string>("amanda");
+  const [tipoRetorno, setTipoRetorno] = useState<string>("retorno-neuro");
+  const [dataRetorno, setDataRetorno] = useState("");
+  const [horaRetorno, setHoraRetorno] = useState<string>("09:00");
+  const [enviando, setEnviando] = useState(false);
+
+  async function salvarRetorno() {
+    setErro(null);
+    setSucesso("");
+    if (!emailCliente.trim() || !dataRetorno || !horaRetorno) {
+      setErro("Informe e-mail do cliente, data e horário.");
+      return;
+    }
+    setEnviando(true);
+    try {
+      await criarRetornoProfissional({
+        data: {
+          email: emailCliente.trim(),
+          tipoSessao: tipoRetorno,
+          data: dataRetorno,
+          horario: horaRetorno,
+          profissionalSlug: profSlug,
+        },
+      });
+      setSucesso("Retorno marcado! O cliente já vê a sessão na área dele.");
+      setEmailCliente("");
+      setDataRetorno("");
+      setMostrandoRetorno(false);
+      carregar();
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Falha ao marcar retorno.");
+    }
+    setEnviando(false);
+  }
 
   function carregar() {
     setErro(null);
@@ -81,7 +131,110 @@ function AdminPage() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-20">
       <p className="eyebrow">Painel administrativo</p>
-      <h1 className="mt-4 font-display text-4xl text-espresso">Admin — {perfilNome || "gestão"}</h1>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-display text-4xl text-espresso">Admin — {perfilNome || "gestão"}</h1>
+        <button
+          onClick={() => setMostrandoRetorno((v) => !v)}
+          className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-linen hover:bg-cocoa"
+        >
+          {mostrandoRetorno ? "Fechar" : "Marcar retorno"}
+        </button>
+      </div>
+
+      {sucesso && (
+        <p className="mt-6 rounded-xl border border-emerald-600/30 bg-emerald-600/5 px-4 py-3 text-xs text-emerald-800">
+          {sucesso}
+        </p>
+      )}
+
+      {mostrandoRetorno && (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-display text-2xl text-espresso">Marcar retorno</h2>
+          <p className="mt-1 text-sm text-cocoa">
+            Identificamos o cliente pelo e-mail cadastrado; a sessão aparece na área dele.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="email-cliente" className="mb-1.5 block text-sm text-cocoa">E-mail do cliente</label>
+              <input
+                id="email-cliente"
+                list="clientes-admin"
+                type="email"
+                value={emailCliente}
+                onChange={(e) => setEmailCliente(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+              />
+              <datalist id="clientes-admin">
+                {visao.contratos.map((c) => (
+                  <option key={c.id} value={c.responsavelEmail}>
+                    {c.atletaNome}
+                  </option>
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <label htmlFor="prof" className="mb-1.5 block text-sm text-cocoa">Profissional responsável</label>
+              <select
+                id="prof"
+                value={profSlug}
+                onChange={(e) => setProfSlug(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+              >
+                {PROFISSIONAIS.map((p) => (
+                  <option key={p.slug} value={p.slug}>
+                    {p.nome} — {p.especialidade}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="tipo" className="mb-1.5 block text-sm text-cocoa">Tipo de sessão</label>
+              <select
+                id="tipo"
+                value={tipoRetorno}
+                onChange={(e) => setTipoRetorno(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+              >
+                {TIPOS_RETORNO.map((t) => (
+                  <option key={t.tipo} value={t.tipo}>{t.rotulo}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="data-ret" className="mb-1.5 block text-sm text-cocoa">Data</label>
+                <input
+                  id="data-ret"
+                  type="date"
+                  value={dataRetorno}
+                  onChange={(e) => setDataRetorno(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+                />
+              </div>
+              <div>
+                <label htmlFor="hora-ret" className="mb-1.5 block text-sm text-cocoa">Horário</label>
+                <select
+                  id="hora-ret"
+                  value={horaRetorno}
+                  onChange={(e) => setHoraRetorno(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-camel"
+                >
+                  {HORARIOS.map((h) => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={salvarRetorno}
+            disabled={enviando}
+            className="mt-6 rounded-full bg-espresso px-6 py-2.5 text-sm font-medium text-linen hover:bg-cocoa disabled:opacity-60"
+          >
+            {enviando ? "Salvando…" : "Confirmar retorno"}
+          </button>
+        </div>
+      )}
 
       {erro && (
         <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">{erro}</p>

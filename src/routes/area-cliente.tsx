@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useGuardaAcesso } from "@/lib/guards";
 import { listarMeusContratos } from "@/lib/contratos.server";
 import { buscarHorariosOcupados } from "@/lib/agendamentos.server";
 import { formatarValor, nomeProfissional, getPacote } from "@/lib/negocio";
@@ -37,6 +38,7 @@ function rotuloSessao(tipo: string): string {
 
 function AreaClientePage() {
   const { user, carregando, perfilNome } = useAuth();
+  useGuardaAcesso(["responsavel"], "/login");
   const [contratos, setContratos] = useState<Awaited<ReturnType<typeof listarMeusContratos>> | null>(null);
   const [sessoes, setSessoes] = useState<SessaoCliente[]>([]);
   const [carregou, setCarregou] = useState(false);
