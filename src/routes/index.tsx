@@ -29,7 +29,7 @@ import gabrielImg from "@/assets/team-gabriel.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nutrição Neurofuncional iEsports | Nutrição Neurofuncional para atletas" },
+      { title: "Nutrição Neurofuncional iEsports | Performance para atletas" },
       {
         name: "description",
         content:
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "Nutrição Neurofuncional iEsports | Nutrição Neurofuncional para atletas",
+        content: "Nutrição Neurofuncional iEsports | Performance para atletas",
       },
       {
         property: "og:description",

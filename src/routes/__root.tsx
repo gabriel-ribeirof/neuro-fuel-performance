@@ -79,14 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Nutrição Neurofuncional iEsports | Nutrição Neurofuncional para atletas" },
+      { title: "Nutrição Neurofuncional iEsports | Performance para atletas" },
       {
         name: "description",
         content:
           "Nutrição Neurofuncional, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Presencial em São Paulo e online.",
       },
       { name: "author", content: "iEsports" },
-      { property: "og:title", content: "Nutrição Neurofuncional iEsports | Nutrição Neurofuncional para atletas" },
+      { property: "og:title", content: "Nutrição Neurofuncional iEsports | Performance para atletas" },
       {
         property: "og:description",
         content: "Nutrição Neurofuncional, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online.",
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Nutrição Neurofuncional iEsports | Nutrição Neurofuncional para atletas" },
+      { name: "twitter:title", content: "Nutrição Neurofuncional iEsports | Performance para atletas" },
       { name: "twitter:description", content: "Nutrição Neurofuncional, performance cognitiva e saúde mental esportiva para atletas aprovados no projeto Experience da iEsports. Atendimento 100% online." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/623a20f8d77bafe25b7e02d0c7fab56c/id-preview-0f73d557--baa57c32-8958-487d-a467-6bdca2b50ccd.lovable.app-1786549057385.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/623a20f8d77bafe25b7e02d0c7fab56c/id-preview-0f73d557--baa57c32-8958-487d-a467-6bdca2b50ccd.lovable.app-1786549057385.png" },
