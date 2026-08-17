@@ -230,10 +230,22 @@ export const listarPacientesProfissional = createServerFn({ method: "GET" })
 /** Profissional marca um retorno com horário no próprio consultório. */
 export const criarRetornoProfissional = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((dado: { email: string; tipoSessao: string; data: string; horario: string }) => dado)
+  .validator(
+    (dado: {
+      email: string;
+      tipoSessao: string;
+      data: string;
+      horario: string;
+      profissionalSlug?: string;
+    }) => dado,
+  )
   .handler(async ({ data, context }) => {
     const perfil = await exigirProfissional(context.userId);
-    const slug = perfil.profissional_slug ?? "amanda";
+    // Admin pode escolher o profissional responsável; profissional marca só na própria agenda.
+    const slug =
+      perfil.role === "admin" && data.profissionalSlug
+        ? data.profissionalSlug
+        : (perfil.profissional_slug ?? data.profissionalSlug ?? "amanda");
     const db = await supabaseAdmin;
 
     const email = data.email.trim().toLowerCase();
