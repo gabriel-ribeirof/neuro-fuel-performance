@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AcessoEquipeRouteImport } from './routes/acesso-equipe'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AgendamentoRouteImport } from './routes/agendamento'
 import { Route as AreaClienteRouteImport } from './routes/area-cliente'
@@ -25,6 +26,11 @@ import { Route as WebhooksMercadoPagoRouteImport } from './routes/webhooks.merca
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcessoEquipeRoute = AcessoEquipeRouteImport.update({
+  id: '/acesso-equipe',
+  path: '/acesso-equipe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -85,6 +91,7 @@ const WebhooksMercadoPagoRoute = WebhooksMercadoPagoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/acesso-equipe': typeof AcessoEquipeRoute
   '/admin': typeof AdminRoute
   '/agendamento': typeof AgendamentoRoute
   '/area-cliente': typeof AreaClienteRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/acesso-equipe': typeof AcessoEquipeRoute
   '/admin': typeof AdminRoute
   '/agendamento': typeof AgendamentoRoute
   '/area-cliente': typeof AreaClienteRoute
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/acesso-equipe': typeof AcessoEquipeRoute
   '/admin': typeof AdminRoute
   '/agendamento': typeof AgendamentoRoute
   '/area-cliente': typeof AreaClienteRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/acesso-equipe'
     | '/admin'
     | '/agendamento'
     | '/area-cliente'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/acesso-equipe'
     | '/admin'
     | '/agendamento'
     | '/area-cliente'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/acesso-equipe'
     | '/admin'
     | '/agendamento'
     | '/area-cliente'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AcessoEquipeRoute: typeof AcessoEquipeRoute
   AdminRoute: typeof AdminRoute
   AgendamentoRoute: typeof AgendamentoRoute
   AreaClienteRoute: typeof AreaClienteRoute
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acesso-equipe': {
+      id: '/acesso-equipe'
+      path: '/acesso-equipe'
+      fullPath: '/acesso-equipe'
+      preLoaderRoute: typeof AcessoEquipeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -277,6 +297,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AcessoEquipeRoute: AcessoEquipeRoute,
   AdminRoute: AdminRoute,
   AgendamentoRoute: AgendamentoRoute,
   AreaClienteRoute: AreaClienteRoute,
