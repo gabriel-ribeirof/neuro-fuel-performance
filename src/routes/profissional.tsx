@@ -32,7 +32,17 @@ type MinhaSessao = {
   duracaoMin: number;
   status: string;
   atletaNome: string;
+  atletaTelefone: string;
 };
+
+/** Link direto pro WhatsApp do cliente. */
+function linkWhatsCliente(telefone: string, atleta: string): string | null {
+  const digitos = (telefone ?? "").replace(/\D/g, "");
+  if (digitos.length < 10) return null;
+  const numero = digitos.startsWith("55") ? digitos : `55${digitos}`;
+  const texto = `Olá! Aqui é da Nutrição Neurofuncional iEsports, sobre o atendimento de ${atleta}.`;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+}
 
 function rotuloSessao(tipo: string): string {
   const mapa: Record<string, string> = {
@@ -64,6 +74,7 @@ function ProfissionalPage() {
   const { user, carregando, perfilNome } = useAuth();
   useGuardaAcesso(["profissional", "admin"], "/acesso-equipe");
   const [sessoes, setSessoes] = useState<MinhaSessao[] | null>(null);
+  const [podeMarcar, setPodeMarcar] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   // Estado do form de retorno
@@ -85,7 +96,10 @@ function ProfissionalPage() {
   function carregar() {
     setErro(null);
     listarMinhaAgenda()
-      .then(setSessoes)
+      .then((dados) => {
+        setSessoes(dados.sessoes);
+        setPodeMarcar(dados.podeMarcar);
+      })
       .catch((e) => setErro(e instanceof Error ? e.message : "Falha ao carregar agenda."));
   }
 
@@ -176,12 +190,14 @@ function ProfissionalPage() {
       <p className="eyebrow">Agenda profissional</p>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-4xl text-espresso">Olá, {perfilNome || "profissional"}</h1>
+        {podeMarcar && (
         <button
           onClick={() => setMostrandoForm((v) => !v)}
           className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-linen hover:bg-cocoa"
         >
           {mostrandoForm ? "Fechar" : "Marcar retorno"}
         </button>
+        )}
       </div>
 
       {erro && (
@@ -195,7 +211,7 @@ function ProfissionalPage() {
         </p>
       )}
 
-      {mostrandoForm && (
+      {mostrandoForm && podeMarcar && (
         <div className="mt-8 rounded-2xl border border-border bg-card p-6">
           <h2 className="font-display text-2xl text-espresso">Marcar retorno</h2>
           <p className="mt-1 text-sm text-cocoa">
@@ -331,7 +347,17 @@ function ProfissionalPage() {
                   <p>{new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")}</p>
                   <p>{s.horario}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {linkWhatsCliente(s.atletaTelefone, s.atletaNome) && (
+                    <a
+                      href={linkWhatsCliente(s.atletaTelefone, s.atletaNome) as string}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full bg-[#25D366] px-4 py-2 text-xs font-medium text-white hover:brightness-95"
+                    >
+                      WhatsApp do cliente
+                    </a>
+                  )}
                   <button
                     onClick={() => trocarStatus(s.id, "realizado")}
                     className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-800"
