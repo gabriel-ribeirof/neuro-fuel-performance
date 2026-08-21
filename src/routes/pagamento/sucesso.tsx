@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { linkWhatsAppProfissional, nomeProfissional } from "@/lib/negocio";
 
 export const Route = createFileRoute("/pagamento/sucesso")({
@@ -7,6 +8,12 @@ export const Route = createFileRoute("/pagamento/sucesso")({
 });
 
 function SucessoPage() {
+  const navigate = useNavigate();
+  // Depois de confirmar o pagamento, leva direto pro calendário de agendamento.
+  useEffect(() => {
+    const t = setTimeout(() => navigate({ to: "/agendamento" }), 3500);
+    return () => clearTimeout(t);
+  }, [navigate]);
   const linkEquipe = linkWhatsAppProfissional(
     "amanda",
     "Olá, Amanda! Acabei de confirmar o pagamento do meu pacote pela Nutrição Neurofuncional iEsports. Vamos agendar minha avaliação inicial?",
@@ -20,7 +27,7 @@ function SucessoPage() {
         <h1 className="mt-6 font-display text-3xl text-espresso">Pagamento confirmado!</h1>
         <p className="mt-3 text-sm text-cocoa">
           Recebemos sua confirmação. Agora é só agendar a avaliação inicial — as duas
-          primeiras sessões ficam marcadas na mesma semana.
+          primeiras sessões ficam marcadas na mesma semana. Levando você ao calendário…
         </p>
         {linkEquipe && (
           <a
