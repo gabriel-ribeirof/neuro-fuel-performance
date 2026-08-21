@@ -10,6 +10,14 @@ import {
 } from "@/lib/admin.server";
 import { formatarValor, nomeProfissional, PROFISSIONAIS, HORARIOS } from "@/lib/negocio";
 
+function linkWhatsCliente(telefone: string, atleta: string): string | null {
+  const digitos = (telefone ?? "").replace(/\D/g, "");
+  if (digitos.length < 10) return null;
+  const numero = digitos.startsWith("55") ? digitos : `55${digitos}`;
+  const texto = `Olá! Aqui é da Nutrição Neurofuncional iEsports, sobre o atendimento de ${atleta}.`;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+}
+
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Painel admin — Nutrição Neurofuncional iEsports" }] }),
   component: AdminPage,
@@ -333,6 +341,16 @@ function AdminPage() {
                     <span className="capitalize">{a.status}</span>
                   </td>
                   <td className="px-5 py-3">
+                    {linkWhatsCliente(a.atletaTelefone, a.atletaNome) && (
+                      <a
+                        href={linkWhatsCliente(a.atletaTelefone, a.atletaNome) as string}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mb-2 inline-block rounded-full bg-[#25D366] px-3 py-1.5 text-xs font-medium text-white hover:brightness-95"
+                      >
+                        WhatsApp
+                      </a>
+                    )}
                     {(a.status === "agendado" || a.status === "confirmado") && (
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <button

@@ -4,6 +4,9 @@ import { requireAuth } from "@/integrations/supabase/auth-middleware.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { nomeProfissional, type ProfissionalSlug } from "@/lib/negocio";
 
+// Só Amanda e Manuela podem marcar sessões para o cliente (além do admin).
+const PODEM_MARCAR = ["amanda", "manuela"];
+
 async function lerPerfilSeguro(userId: string) {
   const db = await supabaseAdmin;
   const { data } = await db
@@ -46,26 +49,36 @@ export const listarMinhaAgenda = createServerFn({ method: "GET" })
       .order("data", { ascending: true });
 
     const nomes = new Map<string, string>();
+    const telefones = new Map<string, string>();
     for (const a of agendamentos ?? []) {
       if (!nomes.has(a.atleta_id)) {
         const { data: atl } = await db
           .from("atletas")
-          .select("nome, sobrenome")
+          .select("nome, sobrenome, telefone")
           .eq("id", a.atleta_id)
           .maybeSingle();
-        if (atl) nomes.set(a.atleta_id, `${atl.nome} ${atl.sobrenome}`);
+        if (atl) {
+          nomes.set(a.atleta_id, `${atl.nome} ${atl.sobrenome}`);
+          telefones.set(a.atleta_id, atl.telefone ?? "");
+        }
       }
     }
 
-    return (agendamentos ?? []).map((a) => ({
-      id: a.id,
-      tipoSessao: a.tipo_sessao,
-      data: a.data,
-      horario: a.horario,
-      duracaoMin: a.duracao_min,
-      status: a.status,
-      atletaNome: nomes.get(a.atleta_id) ?? "—",
-    }));
+    return {
+      profissionalSlug: perfil.profissional_slug ?? "",
+      podeMarcar: PODEM_MARCAR.includes(perfil.profissional_slug ?? "") || perfil.role === "admin",
+      podeRemarcar: perfil.role === "admin",
+      sessoes: (agendamentos ?? []).map((a) => ({
+        id: a.id,
+        tipoSessao: a.tipo_sessao,
+        data: a.data,
+        horario: a.horario,
+        duracaoMin: a.duracao_min,
+        status: a.status,
+        atletaNome: nomes.get(a.atleta_id) ?? "—",
+        atletaTelefone: telefones.get(a.atleta_id) ?? "",
+      })),
+    };
   });
 
 /** Painel admin: resumo de tudo. */
@@ -87,7 +100,11 @@ export const listarVisaoAdmin = createServerFn({ method: "GET" })
     ]);
 
     const nomes = new Map<string, string>();
-    for (const a of atletas ?? []) nomes.set(a.id, `${a.nome} ${a.sobrenome}`);
+    const telefonesAtleta = new Map<string, string>();
+    for (const a of atletas ?? []) {
+      nomes.set(a.id, `${a.nome} ${a.sobrenome}`);
+      telefonesAtleta.set(a.id, a.telefone ?? "");
+    }
     const emails = new Map<string, string>();
     for (const c of contratos ?? []) {
       if (!emails.has(c.user_id)) {
@@ -109,6 +126,7 @@ export const listarVisaoAdmin = createServerFn({ method: "GET" })
       agendamentos: (agendamentos ?? []).map((a) => ({
         id: a.id,
         atletaNome: nomes.get(a.atleta_id) ?? "—",
+        atletaTelefone: telefonesAtleta.get(a.atleta_id) ?? "",
         profissional: a.profissional_slug,
         tipoSessao: a.tipo_sessao,
         data: a.data,
@@ -241,6 +259,9 @@ export const criarRetornoProfissional = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const perfil = await exigirProfissional(context.userId);
+    if (perfil.role !== "admin" && !PODEM_MARCAR.includes(perfil.profissional_slug ?? "")) {
+      throw new Error("Somente Amanda, Manuela ou o admin podem marcar atendimentos.");
+    }
     // Admin pode escolher o profissional responsável; profissional marca só na própria agenda.
     const slug =
       perfil.role === "admin" && data.profissionalSlug

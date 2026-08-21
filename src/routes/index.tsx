@@ -19,7 +19,6 @@ import {
 import { useState } from "react";
 
 import { Reveal } from "@/components/Reveal";
-import heroImg from "@/assets/hero.jpg";
 import neuroImg from "@/assets/neuro.jpg";
 import amandaAsset from "@/assets/team-amanda.jpg.asset.json";
 import manuelaAsset from "@/assets/team-manuela.jpg.asset.json";
@@ -77,13 +76,14 @@ const services = [
   { icon: HeartHandshake, title: "Sessões Individuais", text: "Performance cognitiva, emocional e comportamental com psicologia do esporte." },
 ];
 
-const packages = [
-  { name: "Inicial", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
-  { name: "Plus Atletas", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
-  { name: "Plus com Teste Genético", price: "R$ 6.490", items: ["Pacote Plus + teste genético + devolutiva", "Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)"] },
-  { name: "Plus Pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
-  { name: "Teste Genético avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
+const packages: { name: string; price: string; items: string[]; destaque?: boolean }[] = [
+  { name: "Pacote Atleta", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
+  { name: "Pacote Atleta Performance", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
+  { name: "Atleta Pro", price: "R$ 6.490", destaque: true, items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "1 sessão final multidisciplinar"] },
+  { name: "Pais de Atletas", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
+  { name: "Teste Genético Avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
 ];
+
 
 const team = [
   { name: "Amanda Ciaramicoli", role: "Nutricionista Neurofuncional · Nutrigeneticista · Psicanalista", img: amandaAsset.url },
@@ -122,18 +122,18 @@ function Index() {
       </div>
 
       {/* Hero */}
-      <section id="top" className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-20 lg:grid-cols-2 lg:py-28">
+      <section id="top" className="mx-auto max-w-4xl px-6 py-24 text-center lg:py-32">
         <Reveal>
           <p className="eyebrow">Nutrição Neurofuncional esportiva</p>
           <h1 className="mt-6 text-5xl leading-[1.05] font-normal text-espresso lg:text-7xl">
             A mente do atleta<br />
             também se <em className="italic text-camel">nutre</em>.
           </h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-cocoa">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-cocoa">
             Nutrição funcional, neurociência e saúde mental esportiva para atletas aprovados no
             projeto Experience da iEsports — no Brasil e no exterior.
           </p>
-          <div className="mt-9 flex flex-wrap gap-4">
+          <div className="mt-9 flex flex-wrap justify-center gap-4">
             <a href="#pacotes" className="inline-flex items-center gap-2 rounded-full bg-espresso px-7 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa">
               Conheça os pacotes <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
             </a>
@@ -141,7 +141,7 @@ function Index() {
               Como funciona
             </a>
           </div>
-          <div className="mt-12 flex items-center gap-8">
+          <div className="mt-12 flex items-center justify-center gap-8">
             <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full border border-camel text-center">
               <span className="font-display text-xl text-espresso">+10</span>
               <span className="text-[0.6rem] tracking-[0.14em] text-cocoa uppercase">anos</span>
@@ -151,15 +151,6 @@ function Index() {
               <span className="text-[0.6rem] tracking-[0.14em] text-cocoa uppercase">atletas</span>
             </div>
           </div>
-        </Reveal>
-        <Reveal delay={120}>
-          <img
-            src={heroImg}
-            alt="Nutricionista esportiva em consulta com atleta"
-            width={1200}
-            height={1408}
-            className="h-[560px] w-full rounded-[2rem] object-cover shadow-[0_40px_80px_-50px_rgba(74,52,42,0.6)]"
-          />
         </Reveal>
       </section>
 
@@ -270,10 +261,21 @@ function Index() {
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {packages.map((p, i) => (
               <Reveal key={p.name} delay={i * 80}>
-                <article className="soft-card flex h-full flex-col p-8">
-                  <h3 className="text-2xl text-espresso">{p.name}</h3>
-                  <p className="mt-3 font-display text-3xl text-camel">{p.price}</p>
-                  <ul className="mt-6 flex-1 space-y-3 text-sm text-cocoa">
+                <article
+                  className={`soft-card relative flex h-full flex-col p-8 ${
+                    p.destaque
+                      ? "border-camel bg-espresso text-linen shadow-[0_30px_60px_-40px_rgba(74,52,42,0.9)] lg:scale-[1.04]"
+                      : ""
+                  }`}
+                >
+                  {p.destaque && (
+                    <span className="absolute -top-3 left-8 rounded-full bg-camel px-4 py-1 text-[0.65rem] font-semibold tracking-[0.14em] text-espresso uppercase">
+                      Mais vendido
+                    </span>
+                  )}
+                  <h3 className={`text-2xl ${p.destaque ? "text-linen" : "text-espresso"}`}>{p.name}</h3>
+                  <p className={`mt-3 font-display text-3xl ${p.destaque ? "text-khaki" : "text-camel"}`}>{p.price}</p>
+                  <ul className={`mt-6 flex-1 space-y-3 text-sm ${p.destaque ? "text-khaki" : "text-cocoa"}`}>
                     {p.items.map((it) => (
                       <li key={it} className="flex gap-2">
                         <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-camel" />
@@ -283,13 +285,18 @@ function Index() {
                   </ul>
                   <a
                     href="/pacotes"
-                    className="mt-8 inline-flex items-center justify-center rounded-full bg-espresso px-5 py-3 text-sm font-medium text-linen transition-colors hover:bg-cocoa"
+                    className={`mt-8 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors ${
+                      p.destaque
+                        ? "bg-linen text-espresso hover:bg-khaki"
+                        : "bg-espresso text-linen hover:bg-cocoa"
+                    }`}
                   >
-                    Ver pacote
+                    {p.destaque ? "Quero o Atleta Pro" : "Ver pacote"}
                   </a>
                 </article>
               </Reveal>
             ))}
+
           </div>
         </div>
       </section>

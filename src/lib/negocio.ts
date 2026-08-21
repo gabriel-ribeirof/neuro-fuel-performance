@@ -50,7 +50,7 @@ export type Pacote = {
 export const PACOTES: Pacote[] = [
   {
     slug: "inicial",
-    nome: "Inicial",
+    nome: "Pacote Atleta",
     chamada: "Primeira etapa de avaliação completa",
     valorCentavos: 150_000,
     sessoes: [
@@ -61,7 +61,7 @@ export const PACOTES: Pacote[] = [
   },
   {
     slug: "plus-atletas",
-    nome: "Plus Atletas",
+    nome: "Pacote Atleta Performance",
     chamada: "Acompanhamento intensivo de temporada",
     valorCentavos: 310_000,
     sessoes: [
@@ -73,8 +73,8 @@ export const PACOTES: Pacote[] = [
   },
   {
     slug: "plus-genetico",
-    nome: "Plus com Teste Genético",
-    chamada: "Pacote Plus + teste genético + devolutiva",
+    nome: "Atleta Pro",
+    chamada: "O mais completo — inclui teste genético e devolutiva",
     valorCentavos: 649_000,
     sessoes: [
       { tipo: "neuro", rotulo: "2 Neuro", profissional: "amanda" },
@@ -87,7 +87,7 @@ export const PACOTES: Pacote[] = [
   },
   {
     slug: "plus-pais",
-    nome: "Plus Pais",
+    nome: "Pais de Atletas",
     chamada: "Acompanhamento para atletas com apoio familiar",
     valorCentavos: 250_000,
     sessoes: [
@@ -100,7 +100,7 @@ export const PACOTES: Pacote[] = [
   },
   {
     slug: "genetico-avulso",
-    nome: "Teste Genético avulso",
+    nome: "Teste Genético Avulso",
     chamada: "Teste genético e de metabolômica sem pacote",
     nota: "Pode ser contratado separadamente, sem precisar de pacote.",
     valorCentavos: 450_000,
