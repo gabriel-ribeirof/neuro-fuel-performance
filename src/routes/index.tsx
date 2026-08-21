@@ -270,10 +270,21 @@ function Index() {
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {packages.map((p, i) => (
               <Reveal key={p.name} delay={i * 80}>
-                <article className="soft-card flex h-full flex-col p-8">
-                  <h3 className="text-2xl text-espresso">{p.name}</h3>
-                  <p className="mt-3 font-display text-3xl text-camel">{p.price}</p>
-                  <ul className="mt-6 flex-1 space-y-3 text-sm text-cocoa">
+                <article
+                  className={`soft-card relative flex h-full flex-col p-8 ${
+                    p.destaque
+                      ? "border-camel bg-espresso text-linen shadow-[0_30px_60px_-40px_rgba(74,52,42,0.9)] lg:scale-[1.04]"
+                      : ""
+                  }`}
+                >
+                  {p.destaque && (
+                    <span className="absolute -top-3 left-8 rounded-full bg-camel px-4 py-1 text-[0.65rem] font-semibold tracking-[0.14em] text-espresso uppercase">
+                      Mais vendido
+                    </span>
+                  )}
+                  <h3 className={`text-2xl ${p.destaque ? "text-linen" : "text-espresso"}`}>{p.name}</h3>
+                  <p className={`mt-3 font-display text-3xl ${p.destaque ? "text-khaki" : "text-camel"}`}>{p.price}</p>
+                  <ul className={`mt-6 flex-1 space-y-3 text-sm ${p.destaque ? "text-khaki" : "text-cocoa"}`}>
                     {p.items.map((it) => (
                       <li key={it} className="flex gap-2">
                         <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-camel" />
@@ -283,13 +294,18 @@ function Index() {
                   </ul>
                   <a
                     href="/pacotes"
-                    className="mt-8 inline-flex items-center justify-center rounded-full bg-espresso px-5 py-3 text-sm font-medium text-linen transition-colors hover:bg-cocoa"
+                    className={`mt-8 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors ${
+                      p.destaque
+                        ? "bg-linen text-espresso hover:bg-khaki"
+                        : "bg-espresso text-linen hover:bg-cocoa"
+                    }`}
                   >
-                    Ver pacote
+                    {p.destaque ? "Quero o Atleta Pro" : "Ver pacote"}
                   </a>
                 </article>
               </Reveal>
             ))}
+
           </div>
         </div>
       </section>
