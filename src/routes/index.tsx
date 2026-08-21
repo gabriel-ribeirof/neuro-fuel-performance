@@ -19,7 +19,6 @@ import {
 import { useState } from "react";
 
 import { Reveal } from "@/components/Reveal";
-import heroImg from "@/assets/hero.jpg";
 import neuroImg from "@/assets/neuro.jpg";
 import amandaAsset from "@/assets/team-amanda.jpg.asset.json";
 import manuelaAsset from "@/assets/team-manuela.jpg.asset.json";
@@ -123,18 +122,18 @@ function Index() {
       </div>
 
       {/* Hero */}
-      <section id="top" className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-20 lg:grid-cols-2 lg:py-28">
+      <section id="top" className="mx-auto max-w-4xl px-6 py-24 text-center lg:py-32">
         <Reveal>
           <p className="eyebrow">Nutrição Neurofuncional esportiva</p>
           <h1 className="mt-6 text-5xl leading-[1.05] font-normal text-espresso lg:text-7xl">
             A mente do atleta<br />
             também se <em className="italic text-camel">nutre</em>.
           </h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-cocoa">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-cocoa">
             Nutrição funcional, neurociência e saúde mental esportiva para atletas aprovados no
             projeto Experience da iEsports — no Brasil e no exterior.
           </p>
-          <div className="mt-9 flex flex-wrap gap-4">
+          <div className="mt-9 flex flex-wrap justify-center gap-4">
             <a href="#pacotes" className="inline-flex items-center gap-2 rounded-full bg-espresso px-7 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa">
               Conheça os pacotes <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
             </a>
@@ -142,7 +141,7 @@ function Index() {
               Como funciona
             </a>
           </div>
-          <div className="mt-12 flex items-center gap-8">
+          <div className="mt-12 flex items-center justify-center gap-8">
             <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full border border-camel text-center">
               <span className="font-display text-xl text-espresso">+10</span>
               <span className="text-[0.6rem] tracking-[0.14em] text-cocoa uppercase">anos</span>
@@ -152,15 +151,6 @@ function Index() {
               <span className="text-[0.6rem] tracking-[0.14em] text-cocoa uppercase">atletas</span>
             </div>
           </div>
-        </Reveal>
-        <Reveal delay={120}>
-          <img
-            src={heroImg}
-            alt="Nutricionista esportiva em consulta com atleta"
-            width={1200}
-            height={1408}
-            className="h-[560px] w-full rounded-[2rem] object-cover shadow-[0_40px_80px_-50px_rgba(74,52,42,0.6)]"
-          />
         </Reveal>
       </section>
 
