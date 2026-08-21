@@ -78,11 +78,11 @@ const services = [
 ];
 
 const packages = [
-  { name: "Inicial", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
-  { name: "Plus Atletas", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
-  { name: "Plus com Teste Genético", price: "R$ 6.490", items: ["Pacote Plus + teste genético + devolutiva", "Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)"] },
-  { name: "Plus Pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
-  { name: "Teste Genético avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
+  { name: "Pacote Atleta", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
+  { name: "Pacote Atleta Performance", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
+  { name: "Atleta Pro", price: "R$ 6.490", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)"] },
+  { name: "Pais de Atletas", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
+  { name: "Teste Genético Avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
 ];
 
 const team = [
