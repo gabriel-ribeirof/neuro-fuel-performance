@@ -173,24 +173,16 @@ function Index() {
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-24 lg:grid-cols-2">
           <Reveal>
             <div className="relative">
-              <img
-                src={neuroImg}
-                alt="Alimentos funcionais para performance cognitiva"
-                loading="lazy"
-                width={1200}
-                height={912}
+              <video
+                src={videoAsset.url}
+                poster={neuroImg}
+                controls
+                preload="none"
                 className="h-[420px] w-full rounded-[2rem] object-cover"
-              />
-              {/* Vídeo da Amanda explicando a nutrição neurofuncional */}
-              <button
-                type="button"
-                aria-label="Assistir vídeo: Amanda explica a nutrição neurofuncional"
-                className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-espresso/30"
               >
-                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-linen text-espresso shadow-xl transition-transform hover:scale-105">
-                  <Play className="ml-1 h-8 w-8" strokeWidth={1.5} />
-                </span>
-              </button>
+                <track kind="captions" />
+                Seu navegador não suporta vídeo.
+              </video>
             </div>
           </Reveal>
           <Reveal delay={100}>
