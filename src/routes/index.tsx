@@ -9,7 +9,6 @@ import {
   Dna,
   HeartHandshake,
   Laptop,
-  Play,
   Quote,
   Sparkles,
   Stethoscope,
