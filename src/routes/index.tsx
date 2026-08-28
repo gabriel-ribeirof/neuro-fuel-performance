@@ -18,7 +18,7 @@ import {
 import { useState } from "react";
 
 import { Reveal } from "@/components/Reveal";
-import neuroImg from "@/assets/neuro.jpg";
+
 import amandaAsset from "@/assets/team-amanda.jpg.asset.json";
 import manuelaAsset from "@/assets/team-manuela.jpg.asset.json";
 import leticiaAsset from "@/assets/team-leticia.jpg.asset.json";
@@ -174,9 +174,8 @@ function Index() {
             <div className="relative">
               <video
                 src={videoAsset.url}
-                poster={neuroImg}
                 controls
-                preload="none"
+                preload="auto"
                 className="h-[420px] w-full rounded-[2rem] object-cover"
               >
                 <track kind="captions" />
