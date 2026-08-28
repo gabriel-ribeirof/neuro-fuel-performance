@@ -18,7 +18,7 @@ import {
 import { useState } from "react";
 
 import { Reveal } from "@/components/Reveal";
-import neuroImg from "@/assets/neuro.jpg";
+
 import amandaAsset from "@/assets/team-amanda.jpg.asset.json";
 import manuelaAsset from "@/assets/team-manuela.jpg.asset.json";
 import leticiaAsset from "@/assets/team-leticia.jpg.asset.json";
