@@ -24,6 +24,7 @@ import amandaAsset from "@/assets/team-amanda.jpg.asset.json";
 import manuelaAsset from "@/assets/team-manuela.jpg.asset.json";
 import leticiaAsset from "@/assets/team-leticia.jpg.asset.json";
 import gabrielImg from "@/assets/team-gabriel.jpg";
+import videoAsset from "@/assets/amanda-neurofuncional.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
