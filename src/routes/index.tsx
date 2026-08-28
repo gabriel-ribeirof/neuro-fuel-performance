@@ -174,9 +174,8 @@ function Index() {
             <div className="relative">
               <video
                 src={videoAsset.url}
-                poster={neuroImg}
                 controls
-                preload="none"
+                preload="auto"
                 className="h-[420px] w-full rounded-[2rem] object-cover"
               >
                 <track kind="captions" />
