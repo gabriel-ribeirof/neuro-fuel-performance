@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    pacote: typeof search["pacote"] === "string" ? (search["pacote"] as string) : undefined,
+  }),
   head: () => ({ meta: [{ title: "Entrar — Nutrição Neurofuncional iEsports" }] }),
   component: LoginPage,
 });
@@ -10,6 +13,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { entrar, user, carregando, papel } = useAuth();
   const navigate = useNavigate();
+  const { pacote } = Route.useSearch();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -17,12 +21,16 @@ function LoginPage() {
 
   useEffect(() => {
     if (!carregando && user) {
+      if (papel !== "admin" && papel !== "profissional" && pacote) {
+        navigate({ to: "/pacotes", search: { pacote } as never, replace: true });
+        return;
+      }
       navigate({
         to: papel === "admin" ? "/admin" : papel === "profissional" ? "/profissional" : "/area-cliente",
         replace: true,
       });
     }
-  }, [user, carregando, papel, navigate]);
+  }, [user, carregando, papel, pacote, navigate]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -83,7 +91,7 @@ function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-cocoa">
           Ainda não tem acesso?{" "}
-          <Link to="/cadastro" className="text-espresso underline underline-offset-4">
+          <Link to="/cadastro" search={{ pacote } as never} className="text-espresso underline underline-offset-4">
             Cadastre-se
           </Link>
         </p>
