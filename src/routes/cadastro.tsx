@@ -180,6 +180,10 @@ function CadastroPage() {
             <Campo id="at-sobrenome" label="Sobrenome" value={atSobrenome} onChange={setAtSobrenome} required />
           </div>
           <Campo id="at-idade" label="Idade" type="number" inputMode="numeric" value={atIdade} onChange={setAtIdade} required />
+          {logado && (
+            <Campo id="at-telefone" label="Celular (WhatsApp) do responsável" type="tel" autoComplete="tel" value={telefone} onChange={setTelefone} required placeholder="(11) 99999-9999" />
+          )}
+
 
           <div>
             <p className="mb-1.5 text-sm text-cocoa">Clube/Time (pode marcar mais de um)</p>
