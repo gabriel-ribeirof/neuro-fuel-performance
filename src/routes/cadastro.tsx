@@ -142,6 +142,14 @@ function CadastroPage() {
     setSucesso("Conta criada! Entre para continuar.");
   }
 
+  if (carregando) {
+    return (
+      <section className="mx-auto max-w-2xl px-6 py-20">
+        <p className="text-sm text-cocoa">Verificando seu acesso…</p>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-2xl px-6 py-20">
       <p className="eyebrow">{logado ? "Cadastrar atleta" : "Criar conta"}</p>
