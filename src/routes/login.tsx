@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    pacote: typeof search["pacote"] === "string" ? (search["pacote"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { pacote?: string } =>
+    typeof search["pacote"] === "string" ? { pacote: search["pacote"] as string } : {},
   head: () => ({ meta: [{ title: "Entrar — Nutrição Neurofuncional iEsports" }] }),
   component: LoginPage,
 });

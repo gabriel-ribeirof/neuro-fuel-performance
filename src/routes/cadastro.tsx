@@ -4,9 +4,8 @@ import { useAuth, type DadosAtleta } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/cadastro")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    pacote: typeof search["pacote"] === "string" ? (search["pacote"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { pacote?: string } =>
+    typeof search["pacote"] === "string" ? { pacote: search["pacote"] as string } : {},
   head: () => ({ meta: [{ title: "Criar conta — Nutrição Neurofuncional iEsports" }] }),
   component: CadastroPage,
 });

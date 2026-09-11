@@ -6,9 +6,8 @@ import { criarContratoEIniciarPagamento } from "@/lib/contratos.server";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pacotes")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    pacote: typeof search["pacote"] === "string" ? (search["pacote"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { pacote?: string } =>
+    typeof search["pacote"] === "string" ? { pacote: search["pacote"] as string } : {},
   head: () => ({ meta: [{ title: "Pacotes — Nutrição Neurofuncional iEsports" }] }),
   component: PacotesPage,
 });
