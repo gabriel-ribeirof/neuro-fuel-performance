@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { PACOTES, formatarValor, type Pacote } from "@/lib/negocio";
 import { criarContratoEIniciarPagamento } from "@/lib/contratos.server";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pacotes")({
+  validateSearch: (search: Record<string, unknown>): { pacote?: string } =>
+    typeof search["pacote"] === "string" ? { pacote: search["pacote"] as string } : {},
   head: () => ({ meta: [{ title: "Pacotes — Nutrição Neurofuncional iEsports" }] }),
   component: PacotesPage,
 });
@@ -75,6 +77,8 @@ type AtletaResumo = { id: string; nome: string; sobrenome: string };
 function PacotesPage() {
   const { user, carregando } = useAuth();
   const navigate = useNavigate();
+  const { pacote: pacotePreSelecionado } = Route.useSearch();
+  const autoIniciado = useRef(false);
 
   const [atletas, setAtletas] = useState<AtletaResumo[]>([]);
   const [carregandoAtletas, setCarregandoAtletas] = useState(false);
@@ -102,12 +106,12 @@ function PacotesPage() {
     setErro(null);
 
     if (!user) {
-      navigate({ to: "/login", search: { de: "pacotes", pacote: pacote.slug } as never });
+      navigate({ to: "/login", search: { pacote: pacote.slug } as never });
       return;
     }
 
     if (atletas.length === 0) {
-      navigate({ to: "/cadastro" });
+      navigate({ to: "/cadastro", search: { pacote: pacote.slug } as never });
       return;
     }
 
@@ -131,6 +135,17 @@ function PacotesPage() {
     }
     setEnviandoSlug(null);
   }
+
+  useEffect(() => {
+    if (autoIniciado.current) return;
+    if (!pacotePreSelecionado || carregando || carregandoAtletas) return;
+    const alvo = PACOTES.find((p) => p.slug === pacotePreSelecionado);
+    if (!alvo) return;
+    if (user && atletas.length > 0 && !atletaSelecionado) return;
+    autoIniciado.current = true;
+    void escolher(alvo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pacotePreSelecionado, carregando, carregandoAtletas, user, atletas, atletaSelecionado]);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-20">
@@ -180,7 +195,7 @@ function PacotesPage() {
           <CartaoPacote
             key={pacote.slug}
             pacote={pacote}
-            destaque={pacote.slug === "plus-atletas"}
+            destaque={pacote.slug === "plus-genetico"}
             enviando={enviandoSlug === pacote.slug}
             onEscolher={() => escolher(pacote)}
           />

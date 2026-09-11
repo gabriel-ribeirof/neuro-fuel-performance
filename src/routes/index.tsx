@@ -76,12 +76,12 @@ const services = [
   { icon: HeartHandshake, title: "Sessões Individuais", text: "Performance cognitiva, emocional e comportamental com psicologia do esporte." },
 ];
 
-const packages: { name: string; price: string; items: string[]; destaque?: boolean }[] = [
-  { name: "Pacote Atleta", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
-  { name: "Pacote Atleta Performance", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
-  { name: "Atleta Pro", price: "R$ 6.490", destaque: true, items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "1 sessão final multidisciplinar"] },
-  { name: "Pais de Atletas", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
-  { name: "Teste Genético Avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
+const packages: { name: string; slug: string; price: string; items: string[]; destaque?: boolean }[] = [
+  { name: "Pacote Atleta", slug: "inicial", price: "R$ 1.500", items: ["1 Neuro + 1 Nutri", "4 Sessões visando a performance esportiva"] },
+  { name: "Pacote Atleta Performance", slug: "plus-atletas", price: "R$ 3.100", items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "1 sessão final multidisciplinar"] },
+  { name: "Atleta Pro", slug: "plus-genetico", price: "R$ 6.490", destaque: true, items: ["2 Neuro + 2 Nutri", "8 Sessões visando a performance esportiva", "Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "1 sessão final multidisciplinar"] },
+  { name: "Pais de Atletas", slug: "plus-pais", price: "R$ 2.500", items: ["2 Neuro + 2 Nutri", "2 Neuro adicionais", "1 retorno Neuro + 1 retorno Nutri"] },
+  { name: "Teste Genético Avulso", slug: "genetico-avulso", price: "R$ 4.500", items: ["Teste genético e de metabolômica", "Devolutiva do laudo (60 páginas, 270 genes)", "Pode ser contratado sem pacote"] },
 ];
 
 
@@ -275,7 +275,7 @@ function Index() {
                     ))}
                   </ul>
                   <a
-                    href="/pacotes"
+                    href={`/pacotes?pacote=${p.slug}`}
                     className={`mt-8 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors ${
                       p.destaque
                         ? "bg-linen text-espresso hover:bg-khaki"
