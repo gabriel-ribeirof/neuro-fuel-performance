@@ -110,6 +110,21 @@ function AgendamentoPage() {
     });
   }, [authCarregando, user, contratoParam, navigate]);
 
+  // Atletas do responsável (necessário no fluxo de pacote novo).
+  useEffect(() => {
+    if (!user || !modoPagamento) return;
+    supabase
+      .from("atletas")
+      .select("id, nome, sobrenome")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        const lista = (data ?? []) as { id: string; nome: string; sobrenome: string }[];
+        setAtletas(lista);
+        setAtletaId((atual) => atual || lista[0]?.id || "");
+      });
+  }, [user, modoPagamento]);
+
   // Carrega horários ocupados do intervalo de dias exibidos.
   useEffect(() => {
     if (dias.length === 0) return;
