@@ -304,24 +304,55 @@ function AgendamentoPage() {
         passo={passoAtual()}
         total={3}
         titulo="Agendar avaliação inicial"
-        texto="Primeiro a sessão de neuro com Amanda e depois a avaliação nutricional com Letícia — as duas na mesma semana."
+        texto={
+          modoPagamento
+            ? "Escolha os dias das duas sessões da mesma semana e finalize o pagamento — a reserva só é confirmada quando o pagamento é aprovado."
+            : "Primeiro a sessão de neuro com Amanda e depois a avaliação nutricional com Letícia — as duas na mesma semana."
+        }
       />
 
-      <div className="mb-8 space-y-1.5">
-        <label htmlFor="contrato" className="text-sm text-cocoa">Contrato</label>
-        <select
-          id="contrato"
-          value={contratoId}
-          onChange={(e) => setContratoId(e.target.value)}
-          className="w-full max-w-md rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-camel"
-        >
-          {contratos.map((c) => (
-            <option key={c.id} value={c.id}>
-              Pacote {c.pacoteSlug} — {c.atletaNome}
-            </option>
-          ))}
-        </select>
-      </div>
+      {modoPagamento && pacoteEscolhido ? (
+        <div className="mb-8 space-y-4 rounded-2xl border border-border bg-card p-6">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-camel">Pacote escolhido</p>
+            <p className="mt-1 font-display text-2xl text-espresso">{pacoteEscolhido.nome}</p>
+            <p className="text-sm text-cocoa">{formatarValor(pacoteEscolhido.valorCentavos)}</p>
+          </div>
+          {atletas.length > 1 && (
+            <div className="space-y-1.5">
+              <label htmlFor="atleta" className="text-sm text-cocoa">Atleta</label>
+              <select
+                id="atleta"
+                value={atletaId}
+                onChange={(e) => setAtletaId(e.target.value)}
+                className="w-full max-w-md rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-camel"
+              >
+                {atletas.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nome} {a.sobrenome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mb-8 space-y-1.5">
+          <label htmlFor="contrato" className="text-sm text-cocoa">Contrato</label>
+          <select
+            id="contrato"
+            value={contratoId}
+            onChange={(e) => setContratoId(e.target.value)}
+            className="w-full max-w-md rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-camel"
+          >
+            {contratos.map((c) => (
+              <option key={c.id} value={c.id}>
+                Pacote {c.pacoteSlug} — {c.atletaNome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Passo 1: Amanda */}
       <div className={`rounded-2xl border p-6 ${passoAtual() === 1 ? "border-camel" : "border-border"}`}>
