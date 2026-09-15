@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { PACOTES, formatarValor, type Pacote } from "@/lib/negocio";
-import { criarContratoEIniciarPagamento } from "@/lib/contratos.server";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pacotes")({
@@ -66,7 +65,7 @@ function CartaoPacote({
             : "bg-espresso text-linen hover:bg-cocoa"
         }`}
       >
-        {enviando ? "Redirecionando…" : "Escolher este pacote"}
+        {enviando ? "Abrindo agenda…" : "Escolher e agendar"}
       </button>
     </div>
   );
@@ -115,25 +114,11 @@ function PacotesPage() {
       return;
     }
 
-    if (!atletaSelecionado) {
-      setErro("Selecione o atleta que vai receber o pacote.");
-      return;
-    }
-
     setEnviandoSlug(pacote.slug);
-    try {
-      const { initPoint } = await criarContratoEIniciarPagamento({
-        data: { atletaId: atletaSelecionado, pacoteSlug: pacote.slug },
-      });
-      if (initPoint) {
-        window.location.href = initPoint;
-        return;
-      }
-      setErro("Não foi possível iniciar o pagamento.");
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : "Falha ao iniciar o pagamento.");
-    }
-    setEnviandoSlug(null);
+    navigate({
+      to: "/agendamento",
+      search: { pacote: pacote.slug, atleta: atletaSelecionado || undefined } as never,
+    });
   }
 
   useEffect(() => {

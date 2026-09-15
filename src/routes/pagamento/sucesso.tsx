@@ -11,7 +11,7 @@ function SucessoPage() {
   const navigate = useNavigate();
   // Depois de confirmar o pagamento, leva direto pro calendário de agendamento.
   useEffect(() => {
-    const t = setTimeout(() => navigate({ to: "/agendamento" }), 3500);
+    const t = setTimeout(() => navigate({ to: "/area-cliente" }), 3500);
     return () => clearTimeout(t);
   }, [navigate]);
   const linkEquipe = linkWhatsAppProfissional(
@@ -26,8 +26,7 @@ function SucessoPage() {
         </div>
         <h1 className="mt-6 font-display text-3xl text-espresso">Pagamento confirmado!</h1>
         <p className="mt-3 text-sm text-cocoa">
-          Recebemos sua confirmação. Agora é só agendar a avaliação inicial — as duas
-          primeiras sessões ficam marcadas na mesma semana. Levando você ao calendário…
+          Recebemos sua confirmação. Suas sessões já estão confirmadas na agenda. Levando você à área do cliente…
         </p>
         {linkEquipe && (
           <a
@@ -41,10 +40,10 @@ function SucessoPage() {
         )}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
-            to="/agendamento"
+            to="/area-cliente"
             className="rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa"
           >
-            Agendar avaliação inicial
+            Ver minhas sessões
           </Link>
           <Link
             to="/area-cliente"

@@ -6,10 +6,14 @@ import { listarMeusContratos } from "@/lib/contratos.server";
 import {
   agendarAnamnese,
   buscarHorariosOcupados,
+  reservarAnamneseEIniciarPagamento,
   type HorarioOcupado,
 } from "@/lib/agendamentos.server";
+import { supabase } from "@/integrations/supabase/client";
 import {
   HORARIOS,
+  formatarValor,
+  getPacote,
   dataParaChave,
   ehDiaDeAtendimento,
   horariosDisponiveis,
@@ -25,9 +29,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useSearch } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/agendamento")({
-  validateSearch: (s: Record<string, unknown>): { contrato?: string } => {
-    const contrato = typeof s["contrato"] === "string" ? s["contrato"] : undefined;
-    return contrato !== undefined ? { contrato } : {};
+  validateSearch: (s: Record<string, unknown>): { contrato?: string; pacote?: string; atleta?: string } => {
+    const out: { contrato?: string; pacote?: string; atleta?: string } = {};
+    if (typeof s["contrato"] === "string") out.contrato = s["contrato"];
+    if (typeof s["pacote"] === "string") out.pacote = s["pacote"];
+    if (typeof s["atleta"] === "string") out.atleta = s["atleta"];
+    return out;
   },
   head: () => ({ meta: [{ title: "Agendar avaliação — Nutrição Neurofuncional iEsports" }] }),
   component: AgendamentoPage,
@@ -46,13 +53,21 @@ function Cabecalho({ passo, total, titulo, texto }: { passo: number; total: numb
 type ContratoResumo = { id: string; pacoteSlug: string; valorCentavos: number; atletaNome: string };
 
 function AgendamentoPage() {
-  const { contrato: contratoParam } = useSearch({ from: "/agendamento" });
+  const { contrato: contratoParam, pacote: pacoteParam, atleta: atletaParam } = useSearch({
+    from: "/agendamento",
+  });
   const navigate = useNavigate();
 
   const { user, carregando: authCarregando } = useAuth();
   useGuardaAcesso(["responsavel"], "/login");
   const [contratos, setContratos] = useState<ContratoResumo[]>([]);
   const [carregandoContratos, setCarregandoContratos] = useState(true);
+
+  // Fluxo "escolheu pacote → agenda → paga".
+  const pacoteEscolhido = pacoteParam ? getPacote(pacoteParam) : undefined;
+  const modoPagamento = !!pacoteEscolhido;
+  const [atletas, setAtletas] = useState<{ id: string; nome: string; sobrenome: string }[]>([]);
+  const [atletaId, setAtletaId] = useState<string>(atletaParam ?? "");
 
   const [contratoId, setContratoId] = useState<string>("");
   const [ocupados, setOcupados] = useState<HorarioOcupado[]>([]);
@@ -94,6 +109,21 @@ function AgendamentoPage() {
       setCarregandoContratos(false);
     });
   }, [authCarregando, user, contratoParam, navigate]);
+
+  // Atletas do responsável (necessário no fluxo de pacote novo).
+  useEffect(() => {
+    if (!user || !modoPagamento) return;
+    supabase
+      .from("atletas")
+      .select("id, nome, sobrenome")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        const lista = (data ?? []) as { id: string; nome: string; sobrenome: string }[];
+        setAtletas(lista);
+        setAtletaId((atual) => atual || lista[0]?.id || "");
+      });
+  }, [user, modoPagamento]);
 
   // Carrega horários ocupados do intervalo de dias exibidos.
   useEffect(() => {
@@ -147,6 +177,46 @@ function AgendamentoPage() {
   async function confirmar() {
     setErro(null);
     setSucesso("");
+
+    if (modoPagamento && pacoteEscolhido) {
+      if (!atletaId) {
+        setErro("Selecione o atleta que vai receber o pacote.");
+        return;
+      }
+      if (!amandaData || !amandaHorario || !leticiaData || !leticiaHorario) {
+        setErro("Preencha as duas sessões da anamnese.");
+        return;
+      }
+      if (!termo) {
+        setErro("Você precisa aceitar o termo de responsabilidade para continuar.");
+        return;
+      }
+      setEnviando(true);
+      try {
+        const resultado = await reservarAnamneseEIniciarPagamento({
+          data: {
+            atletaId,
+            pacoteSlug: pacoteEscolhido.slug,
+            amandaData,
+            amandaHorario,
+            leticiaData,
+            leticiaHorario,
+          },
+        });
+        if (!resultado.ok || !resultado.initPoint) {
+          setErro(resultado.erro ?? "Não foi possível iniciar o pagamento.");
+          setEnviando(false);
+          return;
+        }
+        window.location.href = resultado.initPoint;
+        return;
+      } catch (e) {
+        setErro(e instanceof Error ? e.message : "Falha ao iniciar o pagamento.");
+        setEnviando(false);
+        return;
+      }
+    }
+
     if (!contratoId) {
       setErro("Selecione o contrato para agendar.");
       return;
@@ -189,7 +259,26 @@ function AgendamentoPage() {
     );
   }
 
-  if (contratos.length === 0) {
+  if (modoPagamento && atletas.length === 0) {
+    return (
+      <section className="mx-auto max-w-2xl px-6 py-20 text-center">
+        <p className="eyebrow">Agendar avaliação</p>
+        <h1 className="mt-4 font-display text-3xl text-espresso">Cadastre o atleta</h1>
+        <p className="mt-3 text-sm text-cocoa">
+          Precisamos dos dados do atleta antes de marcar as sessões.
+        </p>
+        <Link
+          to="/cadastro"
+          search={{ pacote: pacoteEscolhido?.slug } as never}
+          className="mt-8 inline-block rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen hover:bg-cocoa"
+        >
+          Cadastrar atleta
+        </Link>
+      </section>
+    );
+  }
+
+  if (!modoPagamento && contratos.length === 0) {
     return (
       <section className="mx-auto max-w-2xl px-6 py-20 text-center">
         <p className="eyebrow">Agendar avaliação</p>
@@ -215,24 +304,55 @@ function AgendamentoPage() {
         passo={passoAtual()}
         total={3}
         titulo="Agendar avaliação inicial"
-        texto="Primeiro a sessão de neuro com Amanda e depois a avaliação nutricional com Letícia — as duas na mesma semana."
+        texto={
+          modoPagamento
+            ? "Escolha os dias das duas sessões da mesma semana e finalize o pagamento — a reserva só é confirmada quando o pagamento é aprovado."
+            : "Primeiro a sessão de neuro com Amanda e depois a avaliação nutricional com Letícia — as duas na mesma semana."
+        }
       />
 
-      <div className="mb-8 space-y-1.5">
-        <label htmlFor="contrato" className="text-sm text-cocoa">Contrato</label>
-        <select
-          id="contrato"
-          value={contratoId}
-          onChange={(e) => setContratoId(e.target.value)}
-          className="w-full max-w-md rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-camel"
-        >
-          {contratos.map((c) => (
-            <option key={c.id} value={c.id}>
-              Pacote {c.pacoteSlug} — {c.atletaNome}
-            </option>
-          ))}
-        </select>
-      </div>
+      {modoPagamento && pacoteEscolhido ? (
+        <div className="mb-8 space-y-4 rounded-2xl border border-border bg-card p-6">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-camel">Pacote escolhido</p>
+            <p className="mt-1 font-display text-2xl text-espresso">{pacoteEscolhido.nome}</p>
+            <p className="text-sm text-cocoa">{formatarValor(pacoteEscolhido.valorCentavos)}</p>
+          </div>
+          {atletas.length > 1 && (
+            <div className="space-y-1.5">
+              <label htmlFor="atleta" className="text-sm text-cocoa">Atleta</label>
+              <select
+                id="atleta"
+                value={atletaId}
+                onChange={(e) => setAtletaId(e.target.value)}
+                className="w-full max-w-md rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-camel"
+              >
+                {atletas.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nome} {a.sobrenome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mb-8 space-y-1.5">
+          <label htmlFor="contrato" className="text-sm text-cocoa">Contrato</label>
+          <select
+            id="contrato"
+            value={contratoId}
+            onChange={(e) => setContratoId(e.target.value)}
+            className="w-full max-w-md rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-camel"
+          >
+            {contratos.map((c) => (
+              <option key={c.id} value={c.id}>
+                Pacote {c.pacoteSlug} — {c.atletaNome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Passo 1: Amanda */}
       <div className={`rounded-2xl border p-6 ${passoAtual() === 1 ? "border-camel" : "border-border"}`}>
@@ -389,7 +509,13 @@ function AgendamentoPage() {
             onClick={confirmar}
             className="rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa disabled:opacity-50"
           >
-            {enviando ? "Confirmando…" : "Confirmar agendamento"}
+            {enviando
+              ? modoPagamento
+                ? "Abrindo pagamento…"
+                : "Confirmando…"
+              : modoPagamento
+                ? "Ir para o pagamento"
+                : "Confirmar agendamento"}
           </button>
           {sucesso && (
             <button
