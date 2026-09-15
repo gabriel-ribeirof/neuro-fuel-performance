@@ -509,7 +509,13 @@ function AgendamentoPage() {
             onClick={confirmar}
             className="rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa disabled:opacity-50"
           >
-            {enviando ? "Confirmando…" : "Confirmar agendamento"}
+            {enviando
+              ? modoPagamento
+                ? "Abrindo pagamento…"
+                : "Confirmando…"
+              : modoPagamento
+                ? "Ir para o pagamento"
+                : "Confirmar agendamento"}
           </button>
           {sucesso && (
             <button
