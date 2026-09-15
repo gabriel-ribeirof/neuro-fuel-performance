@@ -259,7 +259,26 @@ function AgendamentoPage() {
     );
   }
 
-  if (contratos.length === 0) {
+  if (modoPagamento && atletas.length === 0) {
+    return (
+      <section className="mx-auto max-w-2xl px-6 py-20 text-center">
+        <p className="eyebrow">Agendar avaliação</p>
+        <h1 className="mt-4 font-display text-3xl text-espresso">Cadastre o atleta</h1>
+        <p className="mt-3 text-sm text-cocoa">
+          Precisamos dos dados do atleta antes de marcar as sessões.
+        </p>
+        <Link
+          to="/cadastro"
+          search={{ pacote: pacoteEscolhido?.slug } as never}
+          className="mt-8 inline-block rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen hover:bg-cocoa"
+        >
+          Cadastrar atleta
+        </Link>
+      </section>
+    );
+  }
+
+  if (!modoPagamento && contratos.length === 0) {
     return (
       <section className="mx-auto max-w-2xl px-6 py-20 text-center">
         <p className="eyebrow">Agendar avaliação</p>
