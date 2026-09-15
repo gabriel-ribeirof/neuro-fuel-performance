@@ -177,6 +177,46 @@ function AgendamentoPage() {
   async function confirmar() {
     setErro(null);
     setSucesso("");
+
+    if (modoPagamento && pacoteEscolhido) {
+      if (!atletaId) {
+        setErro("Selecione o atleta que vai receber o pacote.");
+        return;
+      }
+      if (!amandaData || !amandaHorario || !leticiaData || !leticiaHorario) {
+        setErro("Preencha as duas sessões da anamnese.");
+        return;
+      }
+      if (!termo) {
+        setErro("Você precisa aceitar o termo de responsabilidade para continuar.");
+        return;
+      }
+      setEnviando(true);
+      try {
+        const resultado = await reservarAnamneseEIniciarPagamento({
+          data: {
+            atletaId,
+            pacoteSlug: pacoteEscolhido.slug,
+            amandaData,
+            amandaHorario,
+            leticiaData,
+            leticiaHorario,
+          },
+        });
+        if (!resultado.ok || !resultado.initPoint) {
+          setErro(resultado.erro ?? "Não foi possível iniciar o pagamento.");
+          setEnviando(false);
+          return;
+        }
+        window.location.href = resultado.initPoint;
+        return;
+      } catch (e) {
+        setErro(e instanceof Error ? e.message : "Falha ao iniciar o pagamento.");
+        setEnviando(false);
+        return;
+      }
+    }
+
     if (!contratoId) {
       setErro("Selecione o contrato para agendar.");
       return;
