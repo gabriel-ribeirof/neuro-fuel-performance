@@ -40,10 +40,10 @@ function SucessoPage() {
         )}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
-            to="/agendamento"
+            to="/area-cliente"
             className="rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen transition-colors hover:bg-cocoa"
           >
-            Agendar avaliação inicial
+            Ver minhas sessões
           </Link>
           <Link
             to="/area-cliente"
