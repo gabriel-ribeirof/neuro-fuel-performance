@@ -89,7 +89,7 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
       .from("agendamentos")
       .select("data, horario, profissional_slug")
       .in("data", [amandaData, leticiaData])
-      .in("status", ["agendado", "confirmado"]);
+      .in("status", ["agendado", "confirmado", "aguardando_pagamento"]);
     const indiceOcupado = new Set<string>();
     for (const o of ocupados ?? []) {
       indiceOcupado.add(`${o.data}|${o.horario}|${o.profissional_slug}`);
@@ -160,7 +160,7 @@ export const buscarHorariosOcupados = createServerFn({ method: "GET" })
     const { data: ocupados } = await supabaseAdmin
       .from("agendamentos")
       .select("data, horario, duracao_min, profissional_slug")
-      .in("status", ["agendado", "confirmado"])
+      .in("status", ["agendado", "confirmado", "aguardando_pagamento"])
       .gte("data", data.inicio)
       .lte("data", data.fim);
     return (ocupados ?? []).map((o) => ({
