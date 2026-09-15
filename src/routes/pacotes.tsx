@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { PACOTES, formatarValor, type Pacote } from "@/lib/negocio";
-import { criarContratoEIniciarPagamento } from "@/lib/contratos.server";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pacotes")({
@@ -66,7 +65,7 @@ function CartaoPacote({
             : "bg-espresso text-linen hover:bg-cocoa"
         }`}
       >
-        {enviando ? "Redirecionando…" : "Escolher este pacote"}
+        {enviando ? "Abrindo agenda…" : "Escolher e agendar"}
       </button>
     </div>
   );
