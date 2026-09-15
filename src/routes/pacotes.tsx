@@ -115,25 +115,11 @@ function PacotesPage() {
       return;
     }
 
-    if (!atletaSelecionado) {
-      setErro("Selecione o atleta que vai receber o pacote.");
-      return;
-    }
-
     setEnviandoSlug(pacote.slug);
-    try {
-      const { initPoint } = await criarContratoEIniciarPagamento({
-        data: { atletaId: atletaSelecionado, pacoteSlug: pacote.slug },
-      });
-      if (initPoint) {
-        window.location.href = initPoint;
-        return;
-      }
-      setErro("Não foi possível iniciar o pagamento.");
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : "Falha ao iniciar o pagamento.");
-    }
-    setEnviandoSlug(null);
+    navigate({
+      to: "/agendamento",
+      search: { pacote: pacote.slug, atleta: atletaSelecionado || undefined } as never,
+    });
   }
 
   useEffect(() => {
