@@ -6,10 +6,14 @@ import { listarMeusContratos } from "@/lib/contratos.server";
 import {
   agendarAnamnese,
   buscarHorariosOcupados,
+  reservarAnamneseEIniciarPagamento,
   type HorarioOcupado,
 } from "@/lib/agendamentos.server";
+import { supabase } from "@/integrations/supabase/client";
 import {
   HORARIOS,
+  formatarValor,
+  getPacote,
   dataParaChave,
   ehDiaDeAtendimento,
   horariosDisponiveis,
