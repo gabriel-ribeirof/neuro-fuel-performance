@@ -53,13 +53,21 @@ function Cabecalho({ passo, total, titulo, texto }: { passo: number; total: numb
 type ContratoResumo = { id: string; pacoteSlug: string; valorCentavos: number; atletaNome: string };
 
 function AgendamentoPage() {
-  const { contrato: contratoParam } = useSearch({ from: "/agendamento" });
+  const { contrato: contratoParam, pacote: pacoteParam, atleta: atletaParam } = useSearch({
+    from: "/agendamento",
+  });
   const navigate = useNavigate();
 
   const { user, carregando: authCarregando } = useAuth();
   useGuardaAcesso(["responsavel"], "/login");
   const [contratos, setContratos] = useState<ContratoResumo[]>([]);
   const [carregandoContratos, setCarregandoContratos] = useState(true);
+
+  // Fluxo "escolheu pacote → agenda → paga".
+  const pacoteEscolhido = pacoteParam ? getPacote(pacoteParam) : undefined;
+  const modoPagamento = !!pacoteEscolhido;
+  const [atletas, setAtletas] = useState<{ id: string; nome: string; sobrenome: string }[]>([]);
+  const [atletaId, setAtletaId] = useState<string>(atletaParam ?? "");
 
   const [contratoId, setContratoId] = useState<string>("");
   const [ocupados, setOcupados] = useState<HorarioOcupado[]>([]);
