@@ -55,6 +55,13 @@ async function processarNotificacao(request: Request): Promise<Response> {
       return new Response("ok", { status: 200 });
     }
 
+    // Pagamento aprovado: as sessões reservadas viram confirmadas.
+    await db
+      .from("agendamentos")
+      .update({ status: "confirmado" })
+      .eq("contrato_id", contrato.id)
+      .eq("status", "aguardando_pagamento");
+
     // WhatsApp é manual (links wa.me) — a confirmação do espaço liberado é
     // feita pelo próprio cliente nas telas de confirmación.
     return new Response("ok", { status: 200 });
