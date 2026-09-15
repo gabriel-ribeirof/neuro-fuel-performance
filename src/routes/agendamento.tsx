@@ -22,14 +22,18 @@ import {
   mesmaSemana,
   nomeProfissional,
   proximosDias,
+  NEURO_PROFISSIONAIS,
   type Horario,
+  type ProfissionalSlug,
 } from "@/lib/negocio";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useSearch } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/agendamento")({
-  validateSearch: (s: Record<string, unknown>): { contrato?: string; pacote?: string; atleta?: string } => {
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { contrato?: string; pacote?: string; atleta?: string } => {
     const out: { contrato?: string; pacote?: string; atleta?: string } = {};
     if (typeof s["contrato"] === "string") out.contrato = s["contrato"];
     if (typeof s["pacote"] === "string") out.pacote = s["pacote"];
@@ -40,10 +44,22 @@ export const Route = createFileRoute("/agendamento")({
   component: AgendamentoPage,
 });
 
-function Cabecalho({ passo, total, titulo, texto }: { passo: number; total: number; titulo: string; texto: string }) {
+function Cabecalho({
+  passo,
+  total,
+  titulo,
+  texto,
+}: {
+  passo: number;
+  total: number;
+  titulo: string;
+  texto: string;
+}) {
   return (
     <div className="mb-8">
-      <p className="eyebrow">Etapa {passo} de {total}</p>
+      <p className="eyebrow">
+        Etapa {passo} de {total}
+      </p>
       <h1 className="mt-3 font-display text-3xl text-espresso">{titulo}</h1>
       <p className="mt-2 max-w-xl text-sm text-cocoa">{texto}</p>
     </div>
@@ -53,7 +69,11 @@ function Cabecalho({ passo, total, titulo, texto }: { passo: number; total: numb
 type ContratoResumo = { id: string; pacoteSlug: string; valorCentavos: number; atletaNome: string };
 
 function AgendamentoPage() {
-  const { contrato: contratoParam, pacote: pacoteParam, atleta: atletaParam } = useSearch({
+  const {
+    contrato: contratoParam,
+    pacote: pacoteParam,
+    atleta: atletaParam,
+  } = useSearch({
     from: "/agendamento",
   });
   const navigate = useNavigate();
@@ -72,7 +92,10 @@ function AgendamentoPage() {
   const [contratoId, setContratoId] = useState<string>("");
   const [ocupados, setOcupados] = useState<HorarioOcupado[]>([]);
 
-  // Datas de Amanda e Letícia (YYYY-MM-DD)
+  // Profissional de neuro: Amanda ou Manu
+  const [neuroProfissional, setNeuroProfissional] = useState<ProfissionalSlug>("amanda");
+
+  // Datas de Amanda/Manu e Letícia (YYYY-MM-DD)
   const [amandaData, setAmandaData] = useState<string | undefined>();
   const [amandaHorario, setAmandaHorario] = useState<Horario | null>(null);
   const [leticiaData, setLeticiaData] = useState<string | undefined>();
@@ -83,7 +106,7 @@ function AgendamentoPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState("");
 
-  const dias = useMemo(() => proximosDias(21), []);
+  const dias = useMemo(() => proximosDias(21, new Date(), neuroProfissional), [neuroProfissional]);
   const diasChave = useMemo(() => dias.map(dataParaChave), [dias]);
 
   useEffect(() => {
@@ -103,7 +126,10 @@ function AgendamentoPage() {
         }));
       setContratos(pagos);
       if (pagos.length > 0) {
-        const inicial = (contratoParam && pagos.some((c) => c.id === contratoParam) ? contratoParam : pagos[0]?.id) ?? "";
+        const inicial =
+          (contratoParam && pagos.some((c) => c.id === contratoParam)
+            ? contratoParam
+            : pagos[0]?.id) ?? "";
         setContratoId(inicial);
       }
       setCarregandoContratos(false);
@@ -138,7 +164,7 @@ function AgendamentoPage() {
   const leticiaDataObj = leticiaData ? new Date(`${leticiaData}T12:00:00`) : undefined;
 
   const amandaHorarios = amandaDataObj
-    ? horariosDisponiveis(amandaDataObj, "amanda", ocupados)
+    ? horariosDisponiveis(amandaDataObj, neuroProfissional, ocupados)
     : [];
   const leticiaHorarios = leticiaDataObj
     ? horariosDisponiveis(leticiaDataObj, "leticia", ocupados)
@@ -201,6 +227,7 @@ function AgendamentoPage() {
             amandaHorario,
             leticiaData,
             leticiaHorario,
+            neuroProfissional,
           },
         });
         if (!resultado.ok || !resultado.initPoint) {
@@ -239,6 +266,7 @@ function AgendamentoPage() {
           amandaHorario,
           leticiaData,
           leticiaHorario,
+          neuroProfissional,
         },
       });
       if (!resultado.ok) {
@@ -246,7 +274,9 @@ function AgendamentoPage() {
         setEnviando(false);
         return;
       }
-      setSucesso("Avaliação agendada! Compartilhe a confirmação com a equipe pelo WhatsApp abaixo.");
+      setSucesso(
+        "Avaliação agendada! Compartilhe a confirmação com a equipe pelo WhatsApp abaixo.",
+      );
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Falha ao agendar.");
     }
@@ -287,10 +317,16 @@ function AgendamentoPage() {
           Para agendar a avaliação inicial você precisa ter um pacote com pagamento confirmado.
         </p>
         <div className="mt-8 flex justify-center gap-3">
-          <Link to="/pacotes" className="rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen hover:bg-cocoa">
+          <Link
+            to="/pacotes"
+            className="rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-linen hover:bg-cocoa"
+          >
             Ver pacotes
           </Link>
-          <Link to="/area-cliente" className="rounded-full border border-border px-6 py-3.5 text-sm font-medium text-espresso hover:bg-card">
+          <Link
+            to="/area-cliente"
+            className="rounded-full border border-border px-6 py-3.5 text-sm font-medium text-espresso hover:bg-card"
+          >
             Área do cliente
           </Link>
         </div>
@@ -307,7 +343,7 @@ function AgendamentoPage() {
         texto={
           modoPagamento
             ? "Escolha os dias das duas sessões da mesma semana e finalize o pagamento — a reserva só é confirmada quando o pagamento é aprovado."
-            : "Primeiro a sessão de neuro com Amanda e depois a avaliação nutricional com Letícia — as duas na mesma semana."
+            : "Primeiro a sessão de neuro com Amanda ou Manu e depois a avaliação nutricional com Letícia — as duas na mesma semana."
         }
       />
 
@@ -320,7 +356,9 @@ function AgendamentoPage() {
           </div>
           {atletas.length > 1 && (
             <div className="space-y-1.5">
-              <label htmlFor="atleta" className="text-sm text-cocoa">Atleta</label>
+              <label htmlFor="atleta" className="text-sm text-cocoa">
+                Atleta
+              </label>
               <select
                 id="atleta"
                 value={atletaId}
@@ -338,7 +376,9 @@ function AgendamentoPage() {
         </div>
       ) : (
         <div className="mb-8 space-y-1.5">
-          <label htmlFor="contrato" className="text-sm text-cocoa">Contrato</label>
+          <label htmlFor="contrato" className="text-sm text-cocoa">
+            Contrato
+          </label>
           <select
             id="contrato"
             value={contratoId}
@@ -354,10 +394,38 @@ function AgendamentoPage() {
         </div>
       )}
 
-      {/* Passo 1: Amanda */}
-      <div className={`rounded-2xl border p-6 ${passoAtual() === 1 ? "border-camel" : "border-border"}`}>
-        <h2 className="font-display text-xl text-espresso">1. Neuro com Amanda</h2>
-        <p className="mt-1 text-sm text-cocoa">Escolha o dia e o horário da sessão de anamnese de neuro.</p>
+      {/* Passo 1: Neuro com Amanda ou Manu */}
+      <div
+        className={`rounded-2xl border p-6 ${passoAtual() === 1 ? "border-camel" : "border-border"}`}
+      >
+        <h2 className="font-display text-xl text-espresso">1. Neuro com Amanda ou Manu</h2>
+        <p className="mt-1 text-sm text-cocoa">
+          Escolha o profissional, o dia e o horário da sessão de anamnese de neuro.
+        </p>
+
+        <div className="mt-4 space-y-1.5">
+          <label htmlFor="neuro-prof" className="text-sm text-cocoa">
+            Profissional de neuro
+          </label>
+          <select
+            id="neuro-prof"
+            value={neuroProfissional}
+            onChange={(e) => {
+              setNeuroProfissional(e.target.value as ProfissionalSlug);
+              setAmandaData(undefined);
+              setAmandaHorario(null);
+              setLeticiaData(undefined);
+              setLeticiaHorario(null);
+            }}
+            className="w-full max-w-md rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-camel"
+          >
+            {NEURO_PROFISSIONAIS.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.nome}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="mt-6 grid gap-8 lg:grid-cols-2">
           <div>
@@ -366,7 +434,11 @@ function AgendamentoPage() {
               mode="single"
               selected={amandaData ? new Date(`${amandaData}T12:00:00`) : undefined}
               onSelect={trocarAmanda}
-              disabled={(d) => !ehDiaDeAtendimento(d) || d < new Date(new Date().toDateString()) || !diasChave.includes(dataParaChave(d))}
+              disabled={(d) =>
+                !ehDiaDeAtendimento(d, neuroProfissional) ||
+                d < new Date(new Date().toDateString()) ||
+                !diasChave.includes(dataParaChave(d))
+              }
               className="rounded-xl border border-border"
             />
           </div>
@@ -400,10 +472,16 @@ function AgendamentoPage() {
 
       {/* Passo 2: Letícia */}
       {passoAtual() >= 2 && (
-        <div className={`mt-6 rounded-2xl border p-6 ${passoAtual() === 2 ? "border-camel" : "border-border"}`}>
+        <div
+          className={`mt-6 rounded-2xl border p-6 ${passoAtual() === 2 ? "border-camel" : "border-border"}`}
+        >
           <h2 className="font-display text-xl text-espresso">2. Nutrição com Letícia</h2>
           <p className="mt-1 text-sm text-cocoa">
-            Mesma semana da sessão da Amanda{amandaData ? ` (semana de ${inicioDaSemana(amandaDataObj!).toLocaleDateString("pt-BR")})` : ""}.
+            Mesma semana da sessão da Amanda
+            {amandaData
+              ? ` (semana de ${inicioDaSemana(amandaDataObj!).toLocaleDateString("pt-BR")})`
+              : ""}
+            .
           </p>
 
           <div className="mt-6 grid gap-8 lg:grid-cols-2">
@@ -413,7 +491,10 @@ function AgendamentoPage() {
                 mode="single"
                 selected={leticiaData ? new Date(`${leticiaData}T12:00:00`) : undefined}
                 onSelect={(d) => d && escolherLeticia(d)}
-                disabled={(d) => !ehDiaDeAtendimento(d) || !diasLeticia.some((x) => dataParaChave(x) === dataParaChave(d))}
+                disabled={(d) =>
+                  !ehDiaDeAtendimento(d) ||
+                  !diasLeticia.some((x) => dataParaChave(x) === dataParaChave(d))
+                }
                 className="rounded-xl border border-border"
               />
             </div>
@@ -448,13 +529,15 @@ function AgendamentoPage() {
 
       {/* Passo 3: Termo */}
       {passoAtual() >= 3 && (
-        <div className={`mt-6 rounded-2xl border p-6 ${passoAtual() === 3 ? "border-camel" : "border-border"}`}>
+        <div
+          className={`mt-6 rounded-2xl border p-6 ${passoAtual() === 3 ? "border-camel" : "border-border"}`}
+        >
           <h2 className="font-display text-xl text-espresso">3. Termo de responsabilidade</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-cocoa">
             Confirmo que o atleta está em boas condições para participar das avaliações e que os
             dados informados no cadastro são verdadeiros. Estou ciente de que a avaliação é
-            educativa e não substitui diagnóstico médico, e que o plano nutricional é individualizado
-            e será acompanhado pela equipe da Nutrição Neurofuncional iEsports.
+            educativa e não substitui diagnóstico médico, e que o plano nutricional é
+            individualizado e será acompanhado pela equipe da Nutrição Neurofuncional iEsports.
           </p>
           <label className="mt-5 flex items-start gap-3 text-sm text-cocoa">
             <Checkbox
@@ -468,22 +551,25 @@ function AgendamentoPage() {
       )}
 
       {erro && (
-        <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">{erro}</p>
+        <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">
+          {erro}
+        </p>
       )}
       {sucesso && (
         <div className="mt-6 rounded-xl border border-emerald-600/30 bg-emerald-600/5 px-4 py-3 text-xs text-emerald-800">
           <p>{sucesso}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {[
-              { slug: "amanda" as const, data: amandaData, horario: amandaHorario },
+              { slug: neuroProfissional, data: amandaData, horario: amandaHorario },
               { slug: "leticia" as const, data: leticiaData, horario: leticiaHorario },
             ].map((item) => {
-              const link = item.data && item.horario
-                ? linkWhatsAppProfissional(
-                    item.slug,
-                    `Olá, ${nomeProfissional(item.slug)}! Confirmo a sessão do dia ${new Date(`${item.data}T12:00:00`).toLocaleDateString("pt-BR")} às ${item.horario}. Meu contrato com a Nutrição Neurofuncional iEsports já está pago.`,
-                  )
-                : null;
+              const link =
+                item.data && item.horario
+                  ? linkWhatsAppProfissional(
+                      item.slug,
+                      `Olá, ${nomeProfissional(item.slug)}! Confirmo a sessão do dia ${new Date(`${item.data}T12:00:00`).toLocaleDateString("pt-BR")} às ${item.horario}. Meu contrato com a Nutrição Neurofuncional iEsports já está pago.`,
+                    )
+                  : null;
               if (!link) return null;
               return (
                 <a

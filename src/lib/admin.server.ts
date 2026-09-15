@@ -2,7 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/integrations/supabase/auth-middleware.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { nomeProfissional, type ProfissionalSlug } from "@/lib/negocio";
+import { nomeProfissional, duracaoSessao, type ProfissionalSlug } from "@/lib/negocio";
 
 // Só Amanda e Manuela podem marcar sessões para o cliente (além do admin).
 const PODEM_MARCAR = ["amanda", "manuela"];
@@ -304,7 +304,7 @@ export const criarRetornoProfissional = createServerFn({ method: "POST" })
       tipo_sessao: data.tipoSessao,
       data: data.data,
       horario: data.horario,
-      duracao_min: 60,
+      duracao_min: duracaoSessao(slug as ProfissionalSlug),
       status: "agendado",
     });
     if (error) throw new Error(error.message);

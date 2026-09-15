@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useGuardaAcesso } from "@/lib/guards";
-import { listarMeusContratos } from "@/lib/contratos.server";
+import { listarMeusContratos, retomarPagamento } from "@/lib/contratos.server";
 import { buscarHorariosOcupados } from "@/lib/agendamentos.server";
 import { formatarValor, nomeProfissional, getPacote } from "@/lib/negocio";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,9 +39,12 @@ function rotuloSessao(tipo: string): string {
 function AreaClientePage() {
   const { user, carregando, perfilNome } = useAuth();
   useGuardaAcesso(["responsavel"], "/login");
-  const [contratos, setContratos] = useState<Awaited<ReturnType<typeof listarMeusContratos>> | null>(null);
+  const [contratos, setContratos] = useState<Awaited<
+    ReturnType<typeof listarMeusContratos>
+  > | null>(null);
   const [sessoes, setSessoes] = useState<SessaoCliente[]>([]);
   const [carregou, setCarregou] = useState(false);
+  const [pagamentoPendenteId, setPagamentoPendenteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (carregando) return;
@@ -78,7 +81,22 @@ function AreaClientePage() {
   }, [carregando, user]);
 
   if (carregando || !user || !carregou) {
-    return <section className="mx-auto max-w-4xl px-6 py-20 text-sm text-cocoa">Carregando…</section>;
+    return (
+      <section className="mx-auto max-w-4xl px-6 py-20 text-sm text-cocoa">Carregando…</section>
+    );
+  }
+
+  async function continuarPagamento(contratoId: string) {
+    setPagamentoPendenteId(contratoId);
+    try {
+      const resultado = await retomarPagamento({ data: { contratoId } });
+      if (resultado.initPoint) {
+        window.location.href = resultado.initPoint;
+      }
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Não foi possível retomar o pagamento.");
+      setPagamentoPendenteId(null);
+    }
   }
 
   const futuras = sessoes.filter((s) => s.status === "agendado" || s.status === "confirmado");
@@ -87,7 +105,9 @@ function AreaClientePage() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-20">
       <p className="eyebrow">Área do cliente</p>
-      <h1 className="mt-4 font-display text-4xl text-espresso">Olá, {perfilNome || "responsável"}</h1>
+      <h1 className="mt-4 font-display text-4xl text-espresso">
+        Olá, {perfilNome || "responsável"}
+      </h1>
 
       {contratos && contratos.length === 0 && (
         <div className="mt-10 rounded-2xl border border-border bg-card p-8 text-center">
@@ -135,6 +155,15 @@ function AreaClientePage() {
                       Agendar avaliação
                     </Link>
                   )}
+                  {c.status === "pendente" && (
+                    <button
+                      onClick={() => continuarPagamento(c.id)}
+                      disabled={pagamentoPendenteId === c.id}
+                      className="mt-4 inline-block rounded-full bg-espresso px-5 py-2.5 text-xs font-medium text-linen hover:bg-cocoa disabled:opacity-50"
+                    >
+                      {pagamentoPendenteId === c.id ? "Abrindo pagamento…" : "Continuar pagamento"}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -146,7 +175,10 @@ function AreaClientePage() {
               <p className="mt-3 text-sm text-cocoa">
                 Nenhuma sessão marcada ainda.
                 {contratos.some((c) => c.status === "pago") && (
-                  <Link to="/agendamento" className="ml-1 text-espresso underline underline-offset-4">
+                  <Link
+                    to="/agendamento"
+                    className="ml-1 text-espresso underline underline-offset-4"
+                  >
                     Agendar agora
                   </Link>
                 )}
@@ -154,10 +186,17 @@ function AreaClientePage() {
             ) : (
               <div className="mt-4 space-y-3">
                 {futuras.map((s) => (
-                  <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4">
+                  <div
+                    key={s.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4"
+                  >
                     <div>
-                      <p className="text-sm font-medium text-espresso">{rotuloSessao(s.tipoSessao)}</p>
-                      <p className="mt-0.5 text-xs text-cocoa">{nomeProfissional(s.profissionalSlug as never)}</p>
+                      <p className="text-sm font-medium text-espresso">
+                        {rotuloSessao(s.tipoSessao)}
+                      </p>
+                      <p className="mt-0.5 text-xs text-cocoa">
+                        {nomeProfissional(s.profissionalSlug as never)}
+                      </p>
                     </div>
                     <div className="text-right text-sm text-cocoa">
                       <p>{new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")}</p>
@@ -174,13 +213,22 @@ function AreaClientePage() {
               <h2 className="font-display text-2xl text-espresso">Histórico</h2>
               <div className="mt-4 space-y-3">
                 {passadas.map((s) => (
-                  <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4 opacity-80">
+                  <div
+                    key={s.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4 opacity-80"
+                  >
                     <div>
-                      <p className="text-sm font-medium text-espresso">{rotuloSessao(s.tipoSessao)}</p>
-                      <p className="mt-0.5 text-xs text-cocoa">{nomeProfissional(s.profissionalSlug as never)}</p>
+                      <p className="text-sm font-medium text-espresso">
+                        {rotuloSessao(s.tipoSessao)}
+                      </p>
+                      <p className="mt-0.5 text-xs text-cocoa">
+                        {nomeProfissional(s.profissionalSlug as never)}
+                      </p>
                     </div>
                     <div className="text-right text-sm text-cocoa">
-                      <p>{new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")} · {s.horario}</p>
+                      <p>
+                        {new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")} · {s.horario}
+                      </p>
                       <p className="capitalize">{s.status}</p>
                     </div>
                   </div>

@@ -93,3 +93,37 @@ export const listarMeusContratos = createServerFn({ method: "GET" })
       atletaNome: nomes.get(c.atleta_id) ?? "Atleta",
     }));
   });
+
+/**
+ * Retoma o pagamento de um contrato pendente: cria uma nova preferência
+ * no Mercado Pago e devolve a URL do Checkout Pro.
+ */
+export const retomarPagamento = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((dado: { contratoId: string }) => dado)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    const { data: contrato } = await supabase
+      .from("contratos")
+      .select("id, user_id, pacote_slug, valor_centavos, status")
+      .eq("id", data.contratoId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!contrato) throw new Error("Contrato não encontrado.");
+    if (contrato.status !== "pendente") throw new Error("Esse contrato não está pendente.");
+
+    const pacote = getPacote(contrato.pacote_slug);
+
+    const { data: ud } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const email = ud?.user?.email ?? null;
+
+    const preferencia = await criarPreferenciaPagamento({
+      contratoId: contrato.id,
+      titulo: `Pacote ${pacote?.nome ?? contrato.pacote_slug} — Nutrição Neurofuncional iEsports`,
+      valorCentavos: contrato.valor_centavos,
+      emailCliente: email,
+    });
+
+    return { initPoint: preferencia.initPoint };
+  });

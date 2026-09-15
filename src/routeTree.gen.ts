@@ -18,6 +18,7 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PacotesRouteImport } from './routes/pacotes'
 import { Route as ProfissionalRouteImport } from './routes/profissional'
+import { Route as AdminPacienteRouteImport } from './routes/admin.paciente'
 import { Route as PagamentoFalhaRouteImport } from './routes/pagamento/falha'
 import { Route as PagamentoPendenteRouteImport } from './routes/pagamento/pendente'
 import { Route as PagamentoSucessoRouteImport } from './routes/pagamento/sucesso'
@@ -68,6 +69,11 @@ const ProfissionalRoute = ProfissionalRouteImport.update({
   path: '/profissional',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPacienteRoute = AdminPacienteRouteImport.update({
+  id: '/paciente',
+  path: '/paciente',
+  getParentRoute: () => AdminRoute,
+} as any)
 const PagamentoFalhaRoute = PagamentoFalhaRouteImport.update({
   id: '/pagamento/falha',
   path: '/pagamento/falha',
@@ -92,13 +98,14 @@ const WebhooksMercadoPagoRoute = WebhooksMercadoPagoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acesso-equipe': typeof AcessoEquipeRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agendamento': typeof AgendamentoRoute
   '/area-cliente': typeof AreaClienteRoute
   '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
   '/pacotes': typeof PacotesRoute
   '/profissional': typeof ProfissionalRoute
+  '/admin/paciente': typeof AdminPacienteRoute
   '/pagamento/falha': typeof PagamentoFalhaRoute
   '/pagamento/pendente': typeof PagamentoPendenteRoute
   '/pagamento/sucesso': typeof PagamentoSucessoRoute
@@ -107,13 +114,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acesso-equipe': typeof AcessoEquipeRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agendamento': typeof AgendamentoRoute
   '/area-cliente': typeof AreaClienteRoute
   '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
   '/pacotes': typeof PacotesRoute
   '/profissional': typeof ProfissionalRoute
+  '/admin/paciente': typeof AdminPacienteRoute
   '/pagamento/falha': typeof PagamentoFalhaRoute
   '/pagamento/pendente': typeof PagamentoPendenteRoute
   '/pagamento/sucesso': typeof PagamentoSucessoRoute
@@ -123,13 +131,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acesso-equipe': typeof AcessoEquipeRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agendamento': typeof AgendamentoRoute
   '/area-cliente': typeof AreaClienteRoute
   '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
   '/pacotes': typeof PacotesRoute
   '/profissional': typeof ProfissionalRoute
+  '/admin/paciente': typeof AdminPacienteRoute
   '/pagamento/falha': typeof PagamentoFalhaRoute
   '/pagamento/pendente': typeof PagamentoPendenteRoute
   '/pagamento/sucesso': typeof PagamentoSucessoRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pacotes'
     | '/profissional'
+    | '/admin/paciente'
     | '/pagamento/falha'
     | '/pagamento/pendente'
     | '/pagamento/sucesso'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pacotes'
     | '/profissional'
+    | '/admin/paciente'
     | '/pagamento/falha'
     | '/pagamento/pendente'
     | '/pagamento/sucesso'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pacotes'
     | '/profissional'
+    | '/admin/paciente'
     | '/pagamento/falha'
     | '/pagamento/pendente'
     | '/pagamento/sucesso'
@@ -186,7 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcessoEquipeRoute: typeof AcessoEquipeRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AgendamentoRoute: typeof AgendamentoRoute
   AreaClienteRoute: typeof AreaClienteRoute
   CadastroRoute: typeof CadastroRoute
@@ -264,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfissionalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/paciente': {
+      id: '/admin/paciente'
+      path: '/paciente'
+      fullPath: '/admin/paciente'
+      preLoaderRoute: typeof AdminPacienteRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/pagamento/falha': {
       id: '/pagamento/falha'
       path: '/pagamento/falha'
@@ -295,10 +314,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminPacienteRoute: typeof AdminPacienteRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminPacienteRoute: AdminPacienteRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoEquipeRoute: AcessoEquipeRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AgendamentoRoute: AgendamentoRoute,
   AreaClienteRoute: AreaClienteRoute,
   CadastroRoute: CadastroRoute,
