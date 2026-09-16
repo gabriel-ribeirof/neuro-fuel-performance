@@ -16,7 +16,10 @@ import {
   getPacote,
   dataParaChave,
   ehDiaDeAtendimento,
+  ehDiaDeNeuro,
   horariosDisponiveis,
+  nomeCurtoProfissional,
+  NEURO_PROFISSIONAIS,
   inicioDaSemana,
   linkWhatsAppProfissional,
   mesmaSemana,
@@ -75,6 +78,7 @@ function AgendamentoPage() {
   // Datas de Amanda e Letícia (YYYY-MM-DD)
   const [amandaData, setAmandaData] = useState<string | undefined>();
   const [amandaHorario, setAmandaHorario] = useState<Horario | null>(null);
+  const [neuroProfissional, setNeuroProfissional] = useState<"amanda" | "manuela">("amanda");
   const [leticiaData, setLeticiaData] = useState<string | undefined>();
   const [leticiaHorario, setLeticiaHorario] = useState<Horario | null>(null);
 
@@ -137,9 +141,11 @@ function AgendamentoPage() {
   const amandaDataObj = amandaData ? new Date(`${amandaData}T12:00:00`) : undefined;
   const leticiaDataObj = leticiaData ? new Date(`${leticiaData}T12:00:00`) : undefined;
 
-  const amandaHorarios = amandaDataObj
-    ? horariosDisponiveis(amandaDataObj, "amanda", ocupados)
-    : [];
+  const neuroHorariosPorProfissional = NEURO_PROFISSIONAIS.map((slug) => ({
+    slug,
+    horarios: amandaDataObj ? horariosDisponiveis(amandaDataObj, slug, ocupados) : [],
+  }));
+  const amandaHorarios = neuroHorariosPorProfissional.flatMap((g) => g.horarios);
   const leticiaHorarios = leticiaDataObj
     ? horariosDisponiveis(leticiaDataObj, "leticia", ocupados)
     : [];
@@ -197,6 +203,7 @@ function AgendamentoPage() {
           data: {
             atletaId,
             pacoteSlug: pacoteEscolhido.slug,
+            neuroProfissional,
             amandaData,
             amandaHorario,
             leticiaData,
@@ -235,6 +242,7 @@ function AgendamentoPage() {
       const resultado = await agendarAnamnese({
         data: {
           contratoId,
+          neuroProfissional,
           amandaData,
           amandaHorario,
           leticiaData,
@@ -307,7 +315,7 @@ function AgendamentoPage() {
         texto={
           modoPagamento
             ? "Escolha os dias das duas sessões da mesma semana e finalize o pagamento — a reserva só é confirmada quando o pagamento é aprovado."
-            : "Primeiro a sessão de neuro com Amanda e depois a avaliação nutricional com Letícia — as duas na mesma semana."
+            : "Primeiro a consulta com Amanda ou Manu e depois a avaliação nutricional com Letícia — as duas na mesma semana."
         }
       />
 
@@ -356,8 +364,11 @@ function AgendamentoPage() {
 
       {/* Passo 1: Amanda */}
       <div className={`rounded-2xl border p-6 ${passoAtual() === 1 ? "border-camel" : "border-border"}`}>
-        <h2 className="font-display text-xl text-espresso">1. Neuro com Amanda</h2>
-        <p className="mt-1 text-sm text-cocoa">Escolha o dia e o horário da sessão de anamnese de neuro.</p>
+        <h2 className="font-display text-xl text-espresso">1. Consulta com Amanda ou Manu</h2>
+        <p className="mt-1 text-sm text-cocoa">
+          Atendimentos às terças-feiras, com duração de 1h20. Amanda atende das 08h às 13h e
+          Manu das 13h às 20h — escolha o dia e o horário que preferir.
+        </p>
 
         <div className="mt-6 grid gap-8 lg:grid-cols-2">
           <div>
@@ -366,7 +377,7 @@ function AgendamentoPage() {
               mode="single"
               selected={amandaData ? new Date(`${amandaData}T12:00:00`) : undefined}
               onSelect={trocarAmanda}
-              disabled={(d) => !ehDiaDeAtendimento(d) || d < new Date(new Date().toDateString()) || !diasChave.includes(dataParaChave(d))}
+              disabled={(d) => !ehDiaDeNeuro(d) || d < new Date(new Date().toDateString()) || !diasChave.includes(dataParaChave(d))}
               className="rounded-xl border border-border"
             />
           </div>
@@ -374,24 +385,38 @@ function AgendamentoPage() {
             <p className="mb-2 text-sm text-cocoa">Horário</p>
             {amandaHorarios.length === 0 ? (
               <p className="rounded-xl border border-border px-4 py-3 text-xs text-cocoa">
-                Nenhum horário disponível nesse dia.
+                Nenhum horário disponível nesse dia. Os atendimentos acontecem às terças-feiras.
               </p>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {amandaHorarios.map((h) => (
-                  <button
-                    key={h}
-                    type="button"
-                    onClick={() => setAmandaHorario(h)}
-                    className={`rounded-xl border px-4 py-2.5 text-sm transition-colors ${
-                      amandaHorario === h
-                        ? "border-camel bg-espresso text-linen"
-                        : "border-border bg-card hover:border-camel"
-                    }`}
-                  >
-                    {h}
-                  </button>
-                ))}
+              <div className="space-y-5">
+                {neuroHorariosPorProfissional.map((grupo) =>
+                  grupo.horarios.length === 0 ? null : (
+                    <div key={grupo.slug}>
+                      <p className="mb-2 text-xs uppercase tracking-widest text-camel">
+                        {nomeCurtoProfissional(grupo.slug)}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {grupo.horarios.map((h) => (
+                          <button
+                            key={`${grupo.slug}-${h}`}
+                            type="button"
+                            onClick={() => {
+                              setNeuroProfissional(grupo.slug as "amanda" | "manuela");
+                              setAmandaHorario(h);
+                            }}
+                            className={`rounded-xl border px-4 py-2.5 text-sm transition-colors ${
+                              amandaHorario === h && neuroProfissional === grupo.slug
+                                ? "border-camel bg-espresso text-linen"
+                                : "border-border bg-card hover:border-camel"
+                            }`}
+                          >
+                            {h}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ),
+                )}
               </div>
             )}
           </div>
@@ -403,7 +428,7 @@ function AgendamentoPage() {
         <div className={`mt-6 rounded-2xl border p-6 ${passoAtual() === 2 ? "border-camel" : "border-border"}`}>
           <h2 className="font-display text-xl text-espresso">2. Nutrição com Letícia</h2>
           <p className="mt-1 text-sm text-cocoa">
-            Mesma semana da sessão da Amanda{amandaData ? ` (semana de ${inicioDaSemana(amandaDataObj!).toLocaleDateString("pt-BR")})` : ""}.
+            Mesma semana da consulta com {nomeCurtoProfissional(neuroProfissional)}{amandaData ? ` (semana de ${inicioDaSemana(amandaDataObj!).toLocaleDateString("pt-BR")})` : ""}.
           </p>
 
           <div className="mt-6 grid gap-8 lg:grid-cols-2">
