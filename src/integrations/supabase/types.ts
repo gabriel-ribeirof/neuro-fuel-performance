@@ -172,6 +172,47 @@ export type Database = {
         }
         Relationships: []
       }
+      registros_clinicos: {
+        Row: {
+          atleta_id: string
+          autor_id: string
+          conteudo: string
+          created_at: string
+          id: string
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          atleta_id: string
+          autor_id: string
+          conteudo?: string
+          created_at?: string
+          id?: string
+          tipo?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          atleta_id?: string
+          autor_id?: string
+          conteudo?: string
+          created_at?: string
+          id?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registros_clinicos_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

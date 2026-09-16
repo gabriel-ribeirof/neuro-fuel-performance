@@ -28,6 +28,7 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
   .validator(
     (dado: {
       contratoId: string;
+      neuroProfissional?: "amanda" | "manuela";
       amandaData: string; // YYYY-MM-DD
       amandaHorario: string;
       leticiaData: string;
@@ -37,6 +38,7 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const anamneseNeuro = ANAMNESE_ORDEM[0]!;
+    const neuroSlug = data.neuroProfissional === "manuela" ? "manuela" : "amanda";
     const anamneseNutri = ANAMNESE_ORDEM[1]!;
 
     // 1. Contrato pertence ao responsável e está pago.
@@ -98,7 +100,7 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
     const conflita = (dataStr: string, horario: string, profissional: string) =>
       indiceOcupado.has(`${dataStr}|${horario}|${profissional}`);
 
-    if (conflita(amandaData, data.amandaHorario, anamneseNeuro.profissional)) {
+    if (conflita(amandaData, data.amandaHorario, neuroSlug)) {
       return { ok: false, erro: "Esse horário da Amanda já foi reservado. Escolha outro." };
     }
     if (conflita(leticiaData, data.leticiaHorario, anamneseNutri.profissional)) {
@@ -112,11 +114,11 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
         {
           contrato_id: data.contratoId,
           atleta_id: contrato.atleta_id,
-          profissional_slug: "amanda",
+          profissional_slug: neuroSlug,
           tipo_sessao: "anamnese-neuro",
           data: amandaData,
           horario: data.amandaHorario,
-          duracao_min: 60,
+          duracao_min: 80,
           status: "agendado",
         },
         {
@@ -183,6 +185,7 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
     (dado: {
       atletaId: string;
       pacoteSlug: string;
+      neuroProfissional?: "amanda" | "manuela";
       amandaData: string;
       amandaHorario: string;
       leticiaData: string;
@@ -192,6 +195,7 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    const neuroSlug = data.neuroProfissional === "manuela" ? "manuela" : "amanda";
     const { getPacote } = await import("@/lib/negocio");
     const { criarPreferenciaPagamento } = await import("@/lib/mercado-pago.server");
 
@@ -224,8 +228,8 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
       .in("data", [amandaData, leticiaData])
       .in("status", ["agendado", "confirmado", "aguardando_pagamento"]);
     const indice = new Set((ocupados ?? []).map((o) => `${o.data}|${o.horario}|${o.profissional_slug}`));
-    if (indice.has(`${amandaData}|${data.amandaHorario}|amanda`)) {
-      return { ok: false as const, erro: "Esse horário da Amanda já foi reservado. Escolha outro." };
+    if (indice.has(`${amandaData}|${data.amandaHorario}|${neuroSlug}`)) {
+      return { ok: false as const, erro: "Esse horário já foi reservado. Escolha outro." };
     }
     if (indice.has(`${leticiaData}|${data.leticiaHorario}|leticia`)) {
       return { ok: false as const, erro: "Esse horário da Letícia já foi reservado. Escolha outro." };
@@ -250,11 +254,11 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
       {
         contrato_id: contrato.id as string,
         atleta_id: data.atletaId,
-        profissional_slug: "amanda",
+        profissional_slug: neuroSlug,
         tipo_sessao: "anamnese-neuro",
         data: amandaData,
         horario: data.amandaHorario,
-        duracao_min: 60,
+        duracao_min: 80,
         status: "aguardando_pagamento",
       },
       {

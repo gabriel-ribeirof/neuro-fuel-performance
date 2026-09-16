@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useGuardaAcesso } from "@/lib/guards";
-import { listarMeusContratos } from "@/lib/contratos.server";
+import { listarMeusContratos, retomarPagamentoContrato } from "@/lib/contratos.server";
 import { buscarHorariosOcupados } from "@/lib/agendamentos.server";
 import { formatarValor, nomeProfissional, getPacote } from "@/lib/negocio";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +42,24 @@ function AreaClientePage() {
   const [contratos, setContratos] = useState<Awaited<ReturnType<typeof listarMeusContratos>> | null>(null);
   const [sessoes, setSessoes] = useState<SessaoCliente[]>([]);
   const [carregou, setCarregou] = useState(false);
+  const [retomando, setRetomando] = useState<string | null>(null);
+  const [erroPagamento, setErroPagamento] = useState<string | null>(null);
+
+  async function continuarAdesao(contratoId: string) {
+    setErroPagamento(null);
+    setRetomando(contratoId);
+    try {
+      const r = await retomarPagamentoContrato({ data: { contratoId } });
+      if (r.ok && r.initPoint) {
+        window.location.href = r.initPoint;
+        return;
+      }
+      setErroPagamento(r.erro ?? "Não foi possível abrir o pagamento.");
+    } catch (e) {
+      setErroPagamento(e instanceof Error ? e.message : "Falha ao abrir o pagamento.");
+    }
+    setRetomando(null);
+  }
 
   useEffect(() => {
     if (carregando) return;
@@ -103,6 +121,12 @@ function AreaClientePage() {
         </div>
       )}
 
+      {erroPagamento && (
+        <p className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">
+          {erroPagamento}
+        </p>
+      )}
+
       {contratos && contratos.length > 0 && (
         <>
           <div className="mt-10">
@@ -128,6 +152,21 @@ function AreaClientePage() {
                   </div>
                   <p className="mt-2 text-sm text-cocoa">Atleta: {c.atletaNome}</p>
                   <p className="mt-1 text-sm text-cocoa">{formatarValor(c.valorCentavos)}</p>
+                  {c.status === "pendente" && (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => continuarAdesao(c.id)}
+                        disabled={retomando === c.id}
+                        className="rounded-full bg-espresso px-5 py-2.5 text-xs font-medium text-linen hover:bg-cocoa disabled:opacity-60"
+                      >
+                        {retomando === c.id ? "Abrindo pagamento…" : "Continuar adesão e pagar"}
+                      </button>
+                      <p className="mt-2 text-xs text-cocoa">
+                        Seus horários ficam reservados até o pagamento ser aprovado.
+                      </p>
+                    </div>
+                  )}
                   {c.status === "pago" && futuras.length === 0 && (
                     <Link
                       to="/agendamento"

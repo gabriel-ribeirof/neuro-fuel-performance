@@ -93,3 +93,37 @@ export const listarMeusContratos = createServerFn({ method: "GET" })
       atletaNome: nomes.get(c.atleta_id) ?? "Atleta",
     }));
   });
+/**
+ * Retoma o pagamento de um contrato ainda pendente (o cliente fechou o
+ * checkout sem pagar). Devolve um novo link do Mercado Pago pro mesmo contrato.
+ */
+export const retomarPagamentoContrato = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((dado: { contratoId: string }) => dado)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    const { data: contrato } = await supabase
+      .from("contratos")
+      .select("id, user_id, pacote_slug, valor_centavos, status")
+      .eq("id", data.contratoId)
+      .maybeSingle();
+    if (!contrato || contrato.user_id !== userId) {
+      return { ok: false as const, erro: "Contrato não encontrado." };
+    }
+    if (contrato.status !== "pendente") {
+      return { ok: false as const, erro: "Esse contrato não está aguardando pagamento." };
+    }
+
+    const pacote = getPacote(contrato.pacote_slug);
+    const { data: ud } = await supabaseAdmin.auth.admin.getUserById(userId);
+
+    const preferencia = await criarPreferenciaPagamento({
+      contratoId: contrato.id as string,
+      titulo: `Pacote ${pacote?.nome ?? contrato.pacote_slug} — Nutrição Neurofuncional iEsports`,
+      valorCentavos: contrato.valor_centavos,
+      emailCliente: ud?.user?.email ?? null,
+    });
+
+    return { ok: true as const, initPoint: preferencia.initPoint };
+  });
