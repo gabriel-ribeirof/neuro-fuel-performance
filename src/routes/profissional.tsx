@@ -91,7 +91,7 @@ function ProfissionalPage() {
   const [enviando, setEnviando] = useState(false);
   const [sucesso, setSucesso] = useState("");
 
-  const dias = useMemo(() => proximosDias(30, new Date(), meuSlug), [meuSlug]);
+  const dias = useMemo(() => proximosDias(30), []);
 
   function carregar() {
     setErro(null);
@@ -191,12 +191,12 @@ function ProfissionalPage() {
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-4xl text-espresso">Olá, {perfilNome || "profissional"}</h1>
         {podeMarcar && (
-          <button
-            onClick={() => setMostrandoForm((v) => !v)}
-            className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-linen hover:bg-cocoa"
-          >
-            {mostrandoForm ? "Fechar" : "Marcar retorno"}
-          </button>
+        <button
+          onClick={() => setMostrandoForm((v) => !v)}
+          className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-linen hover:bg-cocoa"
+        >
+          {mostrandoForm ? "Fechar" : "Marcar retorno"}
+        </button>
         )}
       </div>
 
@@ -276,7 +276,7 @@ function ProfissionalPage() {
                   selected={dataObj}
                   onSelect={(d) => d && setDataEscolhida(dataParaChave(d))}
                   disabled={(d) =>
-                    !ehDiaDeAtendimento(d, meuSlug) ||
+                    !ehDiaDeAtendimento(d) ||
                     d < new Date(new Date().toDateString()) ||
                     !diasChave.includes(dataParaChave(d))
                   }

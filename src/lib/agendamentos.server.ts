@@ -5,7 +5,6 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import {
   ANAMNESE_ORDEM,
   dataParaChave,
-  duracaoSessao,
   mesmaSemana,
   type HorarioOcupado,
   type ProfissionalSlug,
@@ -33,13 +32,11 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
       amandaHorario: string;
       leticiaData: string;
       leticiaHorario: string;
-      neuroProfissional?: ProfissionalSlug;
     }) => dado,
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const neuroSlug = data.neuroProfissional ?? "amanda";
-    const anamneseNeuro = { ...ANAMNESE_ORDEM[0]!, profissional: neuroSlug };
+    const anamneseNeuro = ANAMNESE_ORDEM[0]!;
     const anamneseNutri = ANAMNESE_ORDEM[1]!;
 
     // 1. Contrato pertence ao responsável e está pago.
@@ -109,28 +106,30 @@ export const agendarAnamnese = createServerFn({ method: "POST" })
     }
 
     // 6. Cria as duas sessões.
-    const { error } = await supabase.from("agendamentos").insert([
-      {
-        contrato_id: data.contratoId,
-        atleta_id: contrato.atleta_id,
-        profissional_slug: neuroSlug,
-        tipo_sessao: "anamnese-neuro",
-        data: amandaData,
-        horario: data.amandaHorario,
-        duracao_min: duracaoSessao(neuroSlug),
-        status: "agendado",
-      },
-      {
-        contrato_id: data.contratoId,
-        atleta_id: contrato.atleta_id,
-        profissional_slug: "leticia",
-        tipo_sessao: "anamnese-nutri",
-        data: leticiaData,
-        horario: data.leticiaHorario,
-        duracao_min: duracaoSessao("leticia"),
-        status: "agendado",
-      },
-    ]);
+    const { error } = await supabase
+      .from("agendamentos")
+      .insert([
+        {
+          contrato_id: data.contratoId,
+          atleta_id: contrato.atleta_id,
+          profissional_slug: "amanda",
+          tipo_sessao: "anamnese-neuro",
+          data: amandaData,
+          horario: data.amandaHorario,
+          duracao_min: 60,
+          status: "agendado",
+        },
+        {
+          contrato_id: data.contratoId,
+          atleta_id: contrato.atleta_id,
+          profissional_slug: "leticia",
+          tipo_sessao: "anamnese-nutri",
+          data: leticiaData,
+          horario: data.leticiaHorario,
+          duracao_min: 60,
+          status: "agendado",
+        },
+      ]);
     if (error) return { ok: false, erro: error.message };
 
     // WhatsApp: ponto de integração externa (Z-API / WABA) — ver lib/whatsapp.
@@ -144,7 +143,9 @@ export async function listarMeusAgendamentos(userId: string) {
   const db = await supabaseAdmin;
   const { data } = await db
     .from("agendamentos")
-    .select("id, contrato_id, profissional_slug, tipo_sessao, data, horario, duracao_min, status")
+    .select(
+      "id, contrato_id, profissional_slug, tipo_sessao, data, horario, duracao_min, status",
+    )
     .order("data", { ascending: true });
   void userId;
   return data ?? [];
@@ -186,19 +187,16 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
       amandaHorario: string;
       leticiaData: string;
       leticiaHorario: string;
-      neuroProfissional?: ProfissionalSlug;
     }) => dado,
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
     const { getPacote } = await import("@/lib/negocio");
-    const { criarPreferenciaPagamento } = await import("@/lib/mercado-pago-server");
+    const { criarPreferenciaPagamento } = await import("@/lib/mercado-pago.server");
 
     const pacote = getPacote(data.pacoteSlug);
     if (!pacote) return { ok: false as const, erro: "Pacote não encontrado." };
-
-    const neuroSlug = data.neuroProfissional ?? "amanda";
 
     const { data: atleta } = await supabase
       .from("atletas")
@@ -225,17 +223,12 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
       .select("data, horario, profissional_slug")
       .in("data", [amandaData, leticiaData])
       .in("status", ["agendado", "confirmado", "aguardando_pagamento"]);
-    const indice = new Set(
-      (ocupados ?? []).map((o) => `${o.data}|${o.horario}|${o.profissional_slug}`),
-    );
-    if (indice.has(`${amandaData}|${data.amandaHorario}|${neuroSlug}`)) {
-      return { ok: false as const, erro: "Esse horário da neuro já foi reservado. Escolha outro." };
+    const indice = new Set((ocupados ?? []).map((o) => `${o.data}|${o.horario}|${o.profissional_slug}`));
+    if (indice.has(`${amandaData}|${data.amandaHorario}|amanda`)) {
+      return { ok: false as const, erro: "Esse horário da Amanda já foi reservado. Escolha outro." };
     }
     if (indice.has(`${leticiaData}|${data.leticiaHorario}|leticia`)) {
-      return {
-        ok: false as const,
-        erro: "Esse horário da Letícia já foi reservado. Escolha outro.",
-      };
+      return { ok: false as const, erro: "Esse horário da Letícia já foi reservado. Escolha outro." };
     }
 
     const { data: contrato, error: erroContrato } = await supabase
@@ -250,21 +243,18 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
       .select("id")
       .single();
     if (erroContrato || !contrato) {
-      return {
-        ok: false as const,
-        erro: erroContrato?.message ?? "Não foi possível criar o contrato.",
-      };
+      return { ok: false as const, erro: erroContrato?.message ?? "Não foi possível criar o contrato." };
     }
 
     const { error: erroSessoes } = await supabaseAdmin.from("agendamentos").insert([
       {
         contrato_id: contrato.id as string,
         atleta_id: data.atletaId,
-        profissional_slug: neuroSlug,
+        profissional_slug: "amanda",
         tipo_sessao: "anamnese-neuro",
         data: amandaData,
         horario: data.amandaHorario,
-        duracao_min: duracaoSessao(neuroSlug),
+        duracao_min: 60,
         status: "aguardando_pagamento",
       },
       {
@@ -274,7 +264,7 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
         tipo_sessao: "anamnese-nutri",
         data: leticiaData,
         horario: data.leticiaHorario,
-        duracao_min: duracaoSessao("leticia"),
+        duracao_min: 60,
         status: "aguardando_pagamento",
       },
     ]);
@@ -289,9 +279,5 @@ export const reservarAnamneseEIniciarPagamento = createServerFn({ method: "POST"
       emailCliente: ud?.user?.email ?? null,
     });
 
-    return {
-      ok: true as const,
-      contratoId: contrato.id as string,
-      initPoint: preferencia.initPoint,
-    };
+    return { ok: true as const, contratoId: contrato.id as string, initPoint: preferencia.initPoint };
   });
