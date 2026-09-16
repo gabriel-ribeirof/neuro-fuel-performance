@@ -133,12 +133,87 @@ export const ANAMNESE_ORDEM: { tipo: string; profissional: ProfissionalSlug }[] 
 ];
 
 export const HORARIOS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"] as const;
-export type Horario = (typeof HORARIOS)[number];
+export type Horario = string;
 
 export const DJA_SEMANA_ATENDIMENTO = [1, 2, 3, 4, 5]; // seg–sex
 
-export function ehDiaDeAtendimento(data: Date): boolean {
+/** Quem pode conduzir a anamnese de neuro (1ª sessão). */
+export const NEURO_PROFISSIONAIS: ProfissionalSlug[] = ["amanda", "manuela"];
+
+/** Nome curto usado nas telas de agendamento. */
+export function nomeCurtoProfissional(slug: ProfissionalSlug): string {
+  const curtos: Record<string, string> = {
+    amanda: "Amanda",
+    manuela: "Manu",
+    leticia: "Letícia",
+    gabriel: "Gabriel",
+  };
+  return curtos[slug] ?? slug;
+}
+
+export type JanelaAtendimento = {
+  diasSemana: number[]; // 0 = domingo
+  inicio: string; // "08:00"
+  fim: string; // "13:00"
+  duracaoMin: number;
+};
+
+/**
+ * Agenda de cada profissional.
+ *  – Amanda: terças, 08h–13h, consultas de 1h20.
+ *  – Manu: terças, 13h–20h, consultas de 1h20.
+ *  – Demais: seg–sex, horários comerciais de 1h.
+ */
+export const AGENDA_PROFISSIONAL: Record<ProfissionalSlug, JanelaAtendimento[]> = {
+  amanda: [{ diasSemana: [2], inicio: "08:00", fim: "13:00", duracaoMin: 80 }],
+  manuela: [{ diasSemana: [2], inicio: "13:00", fim: "20:00", duracaoMin: 80 }],
+  leticia: [
+    { diasSemana: [1, 2, 3, 4, 5], inicio: "09:00", fim: "12:00", duracaoMin: 60 },
+    { diasSemana: [1, 2, 3, 4, 5], inicio: "14:00", fim: "18:00", duracaoMin: 60 },
+  ],
+  gabriel: [
+    { diasSemana: [1, 2, 3, 4, 5], inicio: "09:00", fim: "12:00", duracaoMin: 60 },
+    { diasSemana: [1, 2, 3, 4, 5], inicio: "14:00", fim: "18:00", duracaoMin: 60 },
+  ],
+};
+
+function paraMinutos(hhmm: string): number {
+  const [h = "0", m = "0"] = hhmm.split(":");
+  return Number(h) * 60 + Number(m);
+}
+
+function paraHora(minutos: number): string {
+  const h = String(Math.floor(minutos / 60)).padStart(2, "0");
+  const m = String(minutos % 60).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+/** Duração padrão da consulta de um profissional (minutos). */
+export function duracaoConsulta(profissional: ProfissionalSlug): number {
+  return AGENDA_PROFISSIONAL[profissional]?.[0]?.duracaoMin ?? 60;
+}
+
+/** Todos os horários que o profissional atende naquele dia (sem checar ocupação). */
+export function horariosDoDia(data: Date, profissional: ProfissionalSlug): string[] {
+  const janelas = AGENDA_PROFISSIONAL[profissional] ?? [];
+  const slots: string[] = [];
+  for (const j of janelas) {
+    if (!j.diasSemana.includes(data.getDay())) continue;
+    for (let t = paraMinutos(j.inicio); t + j.duracaoMin <= paraMinutos(j.fim); t += j.duracaoMin) {
+      slots.push(paraHora(t));
+    }
+  }
+  return slots.sort();
+}
+
+export function ehDiaDeAtendimento(data: Date, profissional?: ProfissionalSlug): boolean {
+  if (profissional) return horariosDoDia(data, profissional).length > 0;
   return DJA_SEMANA_ATENDIMENTO.includes(data.getDay());
+}
+
+/** O profissional de neuro atende nesse dia? (Amanda ou Manu) */
+export function ehDiaDeNeuro(data: Date): boolean {
+  return NEURO_PROFISSIONAIS.some((p) => ehDiaDeAtendimento(data, p));
 }
 
 export function dataParaChave(data: Date): string {
