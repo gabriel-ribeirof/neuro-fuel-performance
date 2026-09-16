@@ -254,17 +254,14 @@ export function horariosDisponiveis(
   profissional: ProfissionalSlug,
   ocupados: HorarioOcupado[],
 ): Horario[] {
-  if (!ehDiaDeAtendimento(data)) return [];
-
   const chave = dataParaChave(data);
   const ocupadosDia = ocupados.filter(
     (o) => o.data === chave && o.profissional === profissional,
   );
 
-  return HORARIOS.filter((horario) => {
-    const conflita = ocupadosDia.some((o) => o.horario === horario);
-    return !conflita;
-  });
+  return horariosDoDia(data, profissional).filter(
+    (horario) => !ocupadosDia.some((o) => o.horario === horario),
+  );
 }
 
 /** Próximos N dias de atendimento a partir de hoje (inclusive). */
