@@ -81,7 +81,9 @@ function AreaClientePage() {
     return <section className="mx-auto max-w-4xl px-6 py-20 text-sm text-cocoa">Carregando…</section>;
   }
 
-  const futuras = sessoes.filter((s) => s.status === "agendado" || s.status === "confirmado");
+  const futuras = sessoes.filter(
+    (s) => s.status === "agendado" || s.status === "confirmado" || s.status === "aguardando_pagamento",
+  );
   const passadas = sessoes.filter((s) => s.status === "realizado" || s.status === "cancelado");
 
   return (
@@ -181,7 +183,7 @@ function AreaClientePage() {
                     </div>
                     <div className="text-right text-sm text-cocoa">
                       <p>{new Date(`${s.data}T12:00:00`).toLocaleDateString("pt-BR")} · {s.horario}</p>
-                      <p className="capitalize">{s.status}</p>
+                      <p className="capitalize">{s.status === "aguardando_pagamento" ? "aguardando pagamento" : s.status}</p>
                     </div>
                   </div>
                 ))}
