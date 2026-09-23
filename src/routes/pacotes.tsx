@@ -133,7 +133,7 @@ function PacotesPage() {
 
   useEffect(() => {
     if (autoIniciado.current) return;
-    if (!pacotePreSelecionado || carregando || carregandoAtletas) return;
+    if (!pacotePreSelecionado || carregando || carregandoAtletas || !atletasProntos) return;
     const alvo = PACOTES.find((p) => p.slug === pacotePreSelecionado);
     if (!alvo) return;
     if (user && atletas.length > 0 && !atletaSelecionado) return;
