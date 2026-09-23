@@ -80,13 +80,20 @@ function PacotesPage() {
   const autoIniciado = useRef(false);
 
   const [atletas, setAtletas] = useState<AtletaResumo[]>([]);
-  const [carregandoAtletas, setCarregandoAtletas] = useState(false);
+  const [carregandoAtletas, setCarregandoAtletas] = useState(true);
+  const [atletasProntos, setAtletasProntos] = useState(false);
   const [atletaSelecionado, setAtletaSelecionado] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [enviandoSlug, setEnviandoSlug] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (carregando) return;
+    if (!user) {
+      setAtletas([]);
+      setCarregandoAtletas(false);
+      setAtletasProntos(true);
+      return;
+    }
     setCarregandoAtletas(true);
     supabase
       .from("atletas")
@@ -98,8 +105,9 @@ function PacotesPage() {
         setAtletas(lista);
         if (lista.length > 0) setAtletaSelecionado(lista[0]?.id ?? "");
         setCarregandoAtletas(false);
+        setAtletasProntos(true);
       });
-  }, [user]);
+  }, [user, carregando]);
 
   async function escolher(pacote: Pacote) {
     setErro(null);
@@ -108,6 +116,8 @@ function PacotesPage() {
       navigate({ to: "/login", search: { pacote: pacote.slug } as never });
       return;
     }
+
+    if (!atletasProntos) return;
 
     if (atletas.length === 0) {
       navigate({ to: "/cadastro", search: { pacote: pacote.slug } as never });
