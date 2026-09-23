@@ -108,18 +108,28 @@ function CadastroPage() {
     };
 
     if (logado && user) {
-      const { error } = await supabase.from("atletas").insert({
-        user_id: user.id,
-        nome: atleta.nome,
-        sobrenome: atleta.sobrenome,
-        idade: atleta.idade,
-        clube: atleta.clube,
-        email: null,
-        telefone: telefone.trim(),
-      });
+      const { data: novo, error } = await supabase
+        .from("atletas")
+        .insert({
+          user_id: user.id,
+          nome: atleta.nome,
+          sobrenome: atleta.sobrenome,
+          idade: atleta.idade,
+          clube: atleta.clube,
+          email: null,
+          telefone: telefone.trim(),
+        })
+        .select("id")
+        .single();
       setEnviando(false);
       if (error) {
         setErro(error.message);
+        return;
+      }
+      // Já sabemos qual atleta acabou de ser criado: vai direto para a agenda,
+      // sem passar por /pacotes (que podia voltar para cá antes da lista carregar).
+      if (pacote && novo?.id) {
+        navigate({ to: "/agendamento", search: { pacote, atleta: novo.id } as never });
         return;
       }
       seguir();

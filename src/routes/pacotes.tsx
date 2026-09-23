@@ -80,13 +80,20 @@ function PacotesPage() {
   const autoIniciado = useRef(false);
 
   const [atletas, setAtletas] = useState<AtletaResumo[]>([]);
-  const [carregandoAtletas, setCarregandoAtletas] = useState(false);
+  const [carregandoAtletas, setCarregandoAtletas] = useState(true);
+  const [atletasProntos, setAtletasProntos] = useState(false);
   const [atletaSelecionado, setAtletaSelecionado] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [enviandoSlug, setEnviandoSlug] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (carregando) return;
+    if (!user) {
+      setAtletas([]);
+      setCarregandoAtletas(false);
+      setAtletasProntos(true);
+      return;
+    }
     setCarregandoAtletas(true);
     supabase
       .from("atletas")
@@ -98,8 +105,9 @@ function PacotesPage() {
         setAtletas(lista);
         if (lista.length > 0) setAtletaSelecionado(lista[0]?.id ?? "");
         setCarregandoAtletas(false);
+        setAtletasProntos(true);
       });
-  }, [user]);
+  }, [user, carregando]);
 
   async function escolher(pacote: Pacote) {
     setErro(null);
@@ -108,6 +116,8 @@ function PacotesPage() {
       navigate({ to: "/login", search: { pacote: pacote.slug } as never });
       return;
     }
+
+    if (!atletasProntos) return;
 
     if (atletas.length === 0) {
       navigate({ to: "/cadastro", search: { pacote: pacote.slug } as never });
@@ -123,14 +133,14 @@ function PacotesPage() {
 
   useEffect(() => {
     if (autoIniciado.current) return;
-    if (!pacotePreSelecionado || carregando || carregandoAtletas) return;
+    if (!pacotePreSelecionado || carregando || carregandoAtletas || !atletasProntos) return;
     const alvo = PACOTES.find((p) => p.slug === pacotePreSelecionado);
     if (!alvo) return;
     if (user && atletas.length > 0 && !atletaSelecionado) return;
     autoIniciado.current = true;
     void escolher(alvo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pacotePreSelecionado, carregando, carregandoAtletas, user, atletas, atletaSelecionado]);
+  }, [pacotePreSelecionado, carregando, carregandoAtletas, atletasProntos, user, atletas, atletaSelecionado]);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-20">
@@ -159,7 +169,7 @@ function PacotesPage() {
         </div>
       )}
 
-      {user && !carregando && atletas.length === 0 && (
+      {user && atletasProntos && !carregandoAtletas && atletas.length === 0 && (
         <p className="mt-8 rounded-xl border border-border bg-card px-4 py-3 text-sm text-cocoa">
           Você ainda não cadastrou um atleta.{" "}
           <Link to="/cadastro" className="text-espresso underline underline-offset-4">
