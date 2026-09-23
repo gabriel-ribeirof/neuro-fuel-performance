@@ -196,7 +196,7 @@ function CadastroPage() {
 
 
           <div>
-            <p className="mb-1.5 text-sm text-cocoa">Clube/Time (pode marcar mais de um)</p>
+            <p className="mb-1.5 text-sm text-cocoa">Clube no projeto:</p>
             <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-4 sm:grid-cols-3">
               {CLUBES.map((clube) => (
                 <label key={clube} className="flex items-center gap-2 text-sm text-cocoa">
