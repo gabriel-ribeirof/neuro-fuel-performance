@@ -140,7 +140,7 @@ function PacotesPage() {
     autoIniciado.current = true;
     void escolher(alvo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pacotePreSelecionado, carregando, carregandoAtletas, user, atletas, atletaSelecionado]);
+  }, [pacotePreSelecionado, carregando, carregandoAtletas, atletasProntos, user, atletas, atletaSelecionado]);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-20">
