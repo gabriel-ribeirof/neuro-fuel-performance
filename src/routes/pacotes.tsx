@@ -169,7 +169,7 @@ function PacotesPage() {
         </div>
       )}
 
-      {user && !carregando && atletas.length === 0 && (
+      {user && atletasProntos && !carregandoAtletas && atletas.length === 0 && (
         <p className="mt-8 rounded-xl border border-border bg-card px-4 py-3 text-sm text-cocoa">
           Você ainda não cadastrou um atleta.{" "}
           <Link to="/cadastro" className="text-espresso underline underline-offset-4">
